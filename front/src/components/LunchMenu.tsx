@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import data from "../../data/restaurants.json";
+import styled from "@emotion/styled";
 
 interface RestaurantInfo {
   번호: string;
@@ -20,9 +21,7 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
 
   const filterRestaurantsNearSuNe = () => {
     const filteredRestaurants = data.filter((restaurant) => {
-      return (
-        restaurant.주소.includes("수내") || restaurant.주소.includes("황새울로")
-      );
+      return restaurant.주소.includes("수내"); // || restaurant.주소.includes("황새울로")
     });
     return filteredRestaurants;
   };
@@ -30,11 +29,11 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
   const handleClickRestaurant = (storeName: string) => {
     const name = !storeName.includes("수내") && `수내역 ${storeName}`;
 
-    window.open(
-      `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
-      "_blank"
-    );
-    // window.open(`https://map.naver.com/v5/search/${storeName}`, "_blank");
+    // window.open(
+    //   `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
+    //   "_blank"
+    // );
+    window.open(`https://map.naver.com/v5/search/${name}`, "_blank");
   };
 
   useEffect(() => {
@@ -56,14 +55,14 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
         </thead>
         <tbody>
           {restaurants.map((restaurant) => (
-            <tr
+            <StyledRow
               key={restaurant.번호}
               onClick={() => handleClickRestaurant(restaurant.상호)}
             >
               <td>{restaurant.상호}</td>
               <td>{restaurant.주소}</td>
               <td>{restaurant.결제방법}</td>
-            </tr>
+            </StyledRow>
           ))}
         </tbody>
       </table>
@@ -72,3 +71,10 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
 };
 
 export default LunchMenu;
+
+const StyledRow = styled.tr`
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
