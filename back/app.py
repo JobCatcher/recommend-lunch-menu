@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import requests
 from bs4 import BeautifulSoup
 
@@ -10,14 +10,19 @@ def scrape_data(url):
     soup = BeautifulSoup(response.text, 'html.parser')
     
     # 예시: 평점, 이미지, 리뷰수 데이터를 크롤링
-    rating = soup.find('span', {'class': 'rating'}).text  # 필요에 맞게 수정
-    image_url = soup.find('img', {'class': 'main-image'})['src']  # 필요에 맞게 수정
-    review_count = soup.find('span', {'class': 'review-count'}).text  # 필요에 맞게 수정
+    # rating = soup.find('span', {'class': 'rating'}).text  # 필요에 맞게 수정
+    # image_url = soup.find('div', {'class': 'claas'})['src']  # 필요에 맞게 수정
+    span_tags = soup.find_all('span', {'class': 'PXMot'})
+    print("span_ "+str(span_tags))
+    print(span_tags[0])
+    visitor_review_count = span_tags[0].find('a').text  # 필요에 맞게 수정
+    blog_review_count = span_tags[1].find('a').text  # 필요에 맞게 수정
     
     return {
-        'rating': rating,
-        'image_url': image_url,
-        'review_count': review_count
+        # 'rating': rating,
+        # 'image_url': image_url,
+        'visitor_review_count': visitor_review_count,
+        'blog_review_count': blog_review_count
     }
 
 # API 엔드포인트
@@ -27,7 +32,8 @@ def hello_world():
 
 @app.route('/api/scrape', methods=['GET'])
 def get_scraped_data():
-    url = 'https://example.com/product-page'  # 크롤링할 URL
+    query = request.args.get('query')
+    url = 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query='+query+'' # 크롤링할 URL
     data = scrape_data(url)
     return jsonify(data)
 
