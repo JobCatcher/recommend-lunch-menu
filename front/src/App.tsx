@@ -21,7 +21,7 @@ function App() {
       <div className="card">
         <button onClick={() => setIsClicked(true)}>추천받기</button>
       </div>
-      <LunchMenu isClicked={isClicked} />
+      {isClicked && <LunchMenu isClicked={isClicked} />}
     </>
   );
 }
