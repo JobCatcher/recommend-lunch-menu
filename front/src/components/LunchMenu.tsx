@@ -26,14 +26,22 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
     return filteredRestaurants;
   };
 
-  const handleClickRestaurant = (storeName: string) => {
-    const name = !storeName.includes("수내") && `수내역 ${storeName}`;
+  const handleClickRestaurant = async (storeName: string) => {
+    const name = !storeName.includes("수내")
+      ? `수내역 ${storeName}`
+      : storeName;
 
     // window.open(
     //   `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
     //   "_blank"
     // );
-    window.open(`https://map.naver.com/v5/search/${name}`, "_blank");
+    // window.open(`https://map.naver.com/v5/search/${name}`, "_blank");
+    console.log("dda: ", `http://localhost:5000/api/scrape?query=${name}`);
+
+    const result = await fetch(
+      `http://localhost:5000/api/scrape?query=${name}`
+    );
+    console.log("re: ", result);
   };
 
   useEffect(() => {
