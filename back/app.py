@@ -1,25 +1,42 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 # 크롤링 함수: 필요한 URL에서 데이터를 추출
 def scrape_data(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    
+    star_rating = 0
+    answer = []
+
     # 예시: 평점, 이미지, 리뷰수 데이터를 크롤링
-    # rating = soup.find('span', {'class': 'rating'}).text  # 필요에 맞게 수정
     # image_url = soup.find('div', {'class': 'claas'})['src']  # 필요에 맞게 수정
     span_tags = soup.find_all('span', {'class': 'PXMot'})
-    print("span_ "+str(span_tags))
-    print(span_tags[0])
-    visitor_review_count = span_tags[0].find('a').text  # 필요에 맞게 수정
-    blog_review_count = span_tags[1].find('a').text  # 필요에 맞게 수정
+    if (len(span_tags) == 0): return
+
+    for tag in span_tags:
+        if 'LXIwF' in tag.get('class', []):
+            print('has rating')
+            # star_rating = tag.text
+            answer.append(tag.text)
+            continue
     
+        answer.append(tag.find('a').text)  # 필요에 맞게 수정
+
+    if (len(answer) == 3): 
+        star_rating = answer[0]
+        visitor_review_count = answer[1]
+        blog_review_count = answer[2]
+    else :
+        visitor_review_count = answer[0]
+        blog_review_count = answer[1]
+
     return {
-        # 'rating': rating,
+        'rating': star_rating,
         # 'image_url': image_url,
         'visitor_review_count': visitor_review_count,
         'blog_review_count': blog_review_count
