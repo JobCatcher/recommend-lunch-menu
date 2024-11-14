@@ -36,10 +36,10 @@ def scrape_data(url):
         blog_review_count = answer[1]
 
     return {
-        'rating': star_rating,
+        '별점': star_rating,
         # 'image_url': image_url,
-        'visitor_review_count': visitor_review_count,
-        'blog_review_count': blog_review_count
+        '방문자리뷰': visitor_review_count,
+        '블로그리뷰': blog_review_count
     }
 
 # API 엔드포인트
