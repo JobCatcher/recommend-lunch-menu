@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
 import data from "../../data/restaurants.json";
 import styled from "@emotion/styled";
+import { getNumbers } from "../utils/utils";
 
-interface RestaurantInfo {
+interface ReviewAndRating {
+  별점?: string;
+  방문자리뷰?: string;
+  블로그리뷰?: string;
+}
+
+interface RestaurantInfo extends ReviewAndRating {
   번호: string;
   품목: string;
   상호: string;
@@ -31,22 +38,45 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
       ? `수내역 ${storeName}`
       : storeName;
 
-    // window.open(
-    //   `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
-    //   "_blank"
-    // );
+    window.open(
+      `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
+      "_blank"
+    );
     // window.open(`https://map.naver.com/v5/search/${name}`, "_blank");
-    console.log("dda: ", `http://localhost:5000/api/scrape?query=${name}`);
+    // console.log("dda: ", `http://localhost:5000/api/scrape?query=${name}`);
+  };
 
+  const getRestaurantReivewAndRating = async (name: string) => {
     const result = await fetch(
       `http://localhost:5000/api/scrape?query=${name}`
     );
-    console.log("re: ", result);
+
+    return await result.json();
+  };
+
+  const initialize = async (restaurants: RestaurantInfo[]) => {
+    const updated = await Promise.all(
+      restaurants.map(async (restaurant) => {
+        const data: ReviewAndRating = await getRestaurantReivewAndRating(
+          restaurant.상호
+        );
+        return {
+          ...restaurant,
+          별점: getNumbers(data?.별점) || "-",
+          방문자리뷰: getNumbers(data?.방문자리뷰) || "-",
+          블로그리뷰: getNumbers(data?.블로그리뷰) || "-",
+        };
+      })
+    );
+    return updated;
   };
 
   useEffect(() => {
     if (isClicked) {
-      setResaurants(filterRestaurantsNearSuNe());
+      const restaurants = filterRestaurantsNearSuNe();
+      initialize(restaurants).then((updated) => {
+        setResaurants(updated);
+      });
     }
   }, [isClicked]);
 
@@ -59,19 +89,27 @@ const LunchMenu = ({ isClicked }: LunchMenuProps) => {
             <th>상호</th>
             <th>위치</th>
             <th>결제방법</th>
+            <th style={{ width: "10%" }}>별점</th>
+            <th style={{ width: "10%" }}>방문자 리뷰</th>
+            <th style={{ width: "10%" }}>블로그 리뷰</th>
           </tr>
         </thead>
         <tbody>
-          {restaurants.map((restaurant) => (
-            <StyledRow
-              key={restaurant.번호}
-              onClick={() => handleClickRestaurant(restaurant.상호)}
-            >
-              <td>{restaurant.상호}</td>
-              <td>{restaurant.주소}</td>
-              <td>{restaurant.결제방법}</td>
-            </StyledRow>
-          ))}
+          {restaurants.map((restaurant) => {
+            return (
+              <StyledRow
+                key={restaurant.번호}
+                onClick={() => handleClickRestaurant(restaurant.상호)}
+              >
+                <td>{restaurant.상호}</td>
+                <td>{restaurant.주소}</td>
+                <td>{restaurant.결제방법}</td>
+                <td>{restaurant.별점}</td>
+                <td>{restaurant.방문자리뷰}</td>
+                <td>{restaurant.블로그리뷰}</td>
+              </StyledRow>
+            );
+          })}
         </tbody>
       </table>
     </div>
