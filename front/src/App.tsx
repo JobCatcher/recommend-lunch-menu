@@ -13,11 +13,20 @@ function Map() {
     script.async = true;
 
     script.onload = () => {
+      let latitude: number, longitude: number;
+
+      navigator.geolocation.getCurrentPosition((position) => {
+        latitude = position.coords.latitude;
+        longitude = position.coords.longitude;
+      });
       // Kakao Maps SDK 로드 후 초기화
       window.kakao.maps.load(() => {
+        if (!latitude && !longitude) {
+          throw new Error("위치 정보를 받아오지 못하였습니다.");
+        }
         const container = document.getElementById("map");
         const options = {
-          center: new window.kakao.maps.LatLng(37.5665, 126.978), // 서울 중심 좌표
+          center: new window.kakao.maps.LatLng(latitude!, longitude!), // 서울 중심 좌표
           level: 3, // 지도 확대 레벨
         };
 
