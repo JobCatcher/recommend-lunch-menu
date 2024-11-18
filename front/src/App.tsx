@@ -13,7 +13,9 @@ function Map() {
     script.async = true;
 
     script.onload = () => {
-      let latitude: number, longitude: number;
+      // 서울 중심 좌표
+      let latitude: number = 37.5665,
+        longitude: number = 126.978;
 
       navigator.geolocation.getCurrentPosition((position) => {
         latitude = position.coords.latitude;
@@ -26,7 +28,7 @@ function Map() {
         }
         const container = document.getElementById("map");
         const options = {
-          center: new window.kakao.maps.LatLng(latitude!, longitude!), // 서울 중심 좌표
+          center: new window.kakao.maps.LatLng(latitude, longitude),
           level: 3, // 지도 확대 레벨
         };
 
@@ -34,7 +36,10 @@ function Map() {
         const map = new window.kakao.maps.Map(container, options);
 
         // 지도에 마커 추가 (옵션)
-        const markerPosition = new window.kakao.maps.LatLng(37.5665, 126.978);
+        const markerPosition = new window.kakao.maps.LatLng(
+          latitude,
+          longitude
+        );
         const marker = new window.kakao.maps.Marker({
           position: markerPosition,
         });
