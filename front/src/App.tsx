@@ -10,7 +10,7 @@ function App() {
 
   return (
     <HomeContainer>
-      <h1>오늘의 점심</h1>
+      <MainTitle>오늘의 점심</MainTitle>
       {/* <div className="card">
         <button onClick={() => setIsClicked(true)}>추천받기</button>
       </div> */}
@@ -26,4 +26,10 @@ const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+`;
+
+const MainTitle = styled.h1`
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
 `;
