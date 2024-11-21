@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import data from "../../data/data.json";
+import ReactDOMServer from "react-dom/server";
+import { handleClickRestaurant } from "../utils/utils";
+import Restaurant from "./Restaurant";
 
 const Map = () => {
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
@@ -16,6 +19,10 @@ const Map = () => {
     return function () {
       infowindow.close();
     };
+  };
+
+  const navigateTo = (title: string) => {
+    return () => handleClickRestaurant(title);
   };
 
   useEffect(() => {
@@ -71,7 +78,11 @@ const Map = () => {
 
           // 마커에 표시할 인포윈도우를 생성합니다
           const infowindow = new kakao.maps.InfoWindow({
-            content: `<div style='padding: 4px; font-size: 12px; color: black;'>${data[i].title}(${data[i].category}) 별점: ${data[i].rating}</div>`, // 인포윈도우에 표시할 내용
+            // content: `<div style='padding: 4px; font-size: 12px; color: black;'>${data[i].title}(${data[i].category}) 별점: ${data[i].rating}</div>`, // 인포윈도우에 표시할 내용
+            content: `${ReactDOMServer.renderToString(
+              <Restaurant {...data[i]} />
+            )}`,
+            // content: `${ReactDOMServer.renderToString(<Test />)}`,
           });
 
           // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
@@ -86,6 +97,9 @@ const Map = () => {
             marker,
             "mouseout",
             makeOutListener(infowindow)
+          );
+          window.kakao.maps.event.addListener(marker, "click", () =>
+            navigateTo(data[i].title)()
           );
         }
 
@@ -110,7 +124,7 @@ const Map = () => {
     };
   }, [mapKey]);
 
-  return <div id="map" style={{ width: "750px", height: "400px" }}></div>;
+  return <div id="map" style={{ width: "750px", height: "500px" }}></div>;
 };
 
 export default Map;
