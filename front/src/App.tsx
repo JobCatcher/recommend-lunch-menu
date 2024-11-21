@@ -75,7 +75,7 @@ function Map() {
 
           // 마커에 표시할 인포윈도우를 생성합니다
           const infowindow = new kakao.maps.InfoWindow({
-            content: `<div style='padding: 4px; font-size: 12px;'>${data[i].title}(${data[i].category}) 별점: ${data[i].rating}</div>`, // 인포윈도우에 표시할 내용
+            content: `<div style='padding: 4px; font-size: 12px; color: black;'>${data[i].title}(${data[i].category}) 별점: ${data[i].rating}</div>`, // 인포윈도우에 표시할 내용
           });
 
           // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
