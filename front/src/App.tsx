@@ -6,7 +6,7 @@ import Map from "./components/Map";
 import styled from "@emotion/styled";
 
 function App() {
-  const [isClicked, setIsClicked] = useState(true);
+  const [isClicked] = useState(true);
 
   return (
     <HomeContainer>

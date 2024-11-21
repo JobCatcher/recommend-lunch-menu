@@ -10,7 +10,7 @@ interface LunchMenuProps {
 }
 
 const LunchMenu = ({ isClicked }: LunchMenuProps) => {
-  const [restaurants, setResaurants] = useState<RestaurantInfo[]>(data);
+  const [restaurants] = useState<RestaurantInfo[]>(data);
 
   useEffect(() => {
     // if (isClicked) {
