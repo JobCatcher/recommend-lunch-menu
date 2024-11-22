@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import data from "../../data/data.json";
 import ReactDOMServer from "react-dom/server";
 import { getDongName, handleClickRestaurant } from "../utils/utils";
