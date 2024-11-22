@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useState } from "react";
 import "./App.css";
+import "./reset.css";
 import LunchMenu from "./components/LunchMenu";
+import Map from "./components/Map";
+import styled from "@emotion/styled";
 
 function Map() {
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
@@ -60,26 +61,30 @@ function Map() {
 }
 
 function App() {
-  const [isClicked, setIsClicked] = useState(false);
+  const [isClicked] = useState(true);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>오늘의 점심</h1>
-      <div className="card">
+    <HomeContainer>
+      <MainTitle>오늘의 점심</MainTitle>
+      {/* <div className="card">
         <button onClick={() => setIsClicked(true)}>추천받기</button>
-      </div>
+      </div> */}
       <Map />
       {isClicked && <LunchMenu isClicked={isClicked} />}
-    </>
+    </HomeContainer>
   );
 }
 
 export default App;
+
+const HomeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const MainTitle = styled.h1`
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 12px;
+`;
