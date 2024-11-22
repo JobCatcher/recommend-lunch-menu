@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 
-const useApiCall = (url: string, header?: { [key: string]: string } | null) => {
-  const [data, setData] = useState<any>(null);
+const useApiCall = <T>(
+  url: string,
+  header?: { [key: string]: string } | null
+) => {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,8 +18,10 @@ const useApiCall = (url: string, header?: { [key: string]: string } | null) => {
       });
       const data = await response.json();
       setData(data);
-    } catch (error) {
-      setError("An error occurred while fetching data.");
+    } catch (e) {
+      if (e instanceof Error) {
+        setError(e.message);
+      }
     } finally {
       setLoading(false);
     }
