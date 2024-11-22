@@ -1,126 +1,59 @@
 import { useEffect, useState } from "react";
-import data from "../../data/restaurants.json";
+import data from "../../data/data.json";
 import styled from "@emotion/styled";
-import { getNumbers } from "../utils/utils";
 
-interface ReviewAndRating {
-  별점?: string;
-  방문자리뷰?: string;
-  블로그리뷰?: string;
-}
-
-interface RestaurantInfo extends ReviewAndRating {
-  번호: string;
-  품목: string;
-  상호: string;
-  구: string;
-  주소: string;
-  전화번호: string;
-  결제방법: string;
-}
+import Restaurant from "./Restaurant";
+import { RestaurantInfo } from "../types/restaurant";
 
 interface LunchMenuProps {
   isClicked: boolean;
 }
 
 const LunchMenu = ({ isClicked }: LunchMenuProps) => {
-  const [restaurants, setResaurants] = useState<RestaurantInfo[]>([]);
-
-  const filterRestaurantsNearSuNe = () => {
-    const filteredRestaurants = data.filter((restaurant) => {
-      return restaurant.주소.includes("수내"); // || restaurant.주소.includes("황새울로")
-    });
-    return filteredRestaurants;
-  };
-
-  const handleClickRestaurant = async (storeName: string) => {
-    const name = !storeName.includes("수내")
-      ? `수내역 ${storeName}`
-      : storeName;
-
-    window.open(
-      `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
-      "_blank"
-    );
-    // window.open(`https://map.naver.com/v5/search/${name}`, "_blank");
-    // console.log("dda: ", `http://localhost:5000/api/scrape?query=${name}`);
-  };
-
-  const getRestaurantReivewAndRating = async (name: string) => {
-    const result = await fetch(
-      `http://localhost:5000/api/scrape?query=${name}`
-    );
-
-    return await result.json();
-  };
-
-  const initialize = async (restaurants: RestaurantInfo[]) => {
-    const updated = await Promise.all(
-      restaurants.map(async (restaurant) => {
-        const data: ReviewAndRating = await getRestaurantReivewAndRating(
-          restaurant.상호
-        );
-        return {
-          ...restaurant,
-          별점: getNumbers(data?.별점) || "-",
-          방문자리뷰: getNumbers(data?.방문자리뷰) || "-",
-          블로그리뷰: getNumbers(data?.블로그리뷰) || "-",
-        };
-      })
-    );
-    return updated;
-  };
+  const [restaurants] = useState<RestaurantInfo[]>(data);
 
   useEffect(() => {
-    if (isClicked) {
-      const restaurants = filterRestaurantsNearSuNe();
-      initialize(restaurants).then((updated) => {
-        setResaurants(updated);
-      });
-    }
+    // if (isClicked) {
+    //   const restaurants = filterRestaurantsNearSuNe();
+    //   initialize(restaurants).then((updated) => {
+    //     setResaurants(updated);
+    //   });
+    // }
   }, [isClicked]);
 
   return (
-    <div>
-      <h2>Lunch Menu</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>상호</th>
-            <th>위치</th>
-            <th>결제방법</th>
-            <th style={{ width: "10%" }}>별점</th>
-            <th style={{ width: "10%" }}>방문자 리뷰</th>
-            <th style={{ width: "10%" }}>블로그 리뷰</th>
-          </tr>
-        </thead>
-        <tbody>
-          {restaurants.map((restaurant) => {
-            return (
-              <StyledRow
-                key={restaurant.번호}
-                onClick={() => handleClickRestaurant(restaurant.상호)}
-              >
-                <td>{restaurant.상호}</td>
-                <td>{restaurant.주소}</td>
-                <td>{restaurant.결제방법}</td>
-                <td>{restaurant.별점}</td>
-                <td>{restaurant.방문자리뷰}</td>
-                <td>{restaurant.블로그리뷰}</td>
-              </StyledRow>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+    <LunchMenuContainer>
+      <StyledText>추천 메뉴</StyledText>
+      <LunchMenuWrapper>
+        {restaurants.map((restaurant, idx) => {
+          return (
+            <Restaurant key={`${restaurant.title}-${idx}`} {...restaurant} />
+          );
+        })}
+      </LunchMenuWrapper>
+    </LunchMenuContainer>
   );
 };
 
 export default LunchMenu;
 
-const StyledRow = styled.tr`
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
+const LunchMenuContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+`;
+
+const StyledText = styled.h2`
+  font-size: 24px;
+  font-weight 600;
+  margin: 16px 0;
+`;
+
+const LunchMenuWrapper = styled.ul`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 16px;
+  width: 100%;
+  place-items: center;
 `;
