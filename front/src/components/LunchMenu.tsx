@@ -1,25 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import data from "../../data/data.json";
 import styled from "@emotion/styled";
 
 import Restaurant from "./Restaurant";
 import { RestaurantInfo } from "../types/restaurant";
 
-interface LunchMenuProps {
-  isClicked: boolean;
-}
-
-const LunchMenu = ({ isClicked }: LunchMenuProps) => {
+const LunchMenu = () => {
   const [restaurants] = useState<RestaurantInfo[]>(data);
-
-  useEffect(() => {
-    // if (isClicked) {
-    //   const restaurants = filterRestaurantsNearSuNe();
-    //   initialize(restaurants).then((updated) => {
-    //     setResaurants(updated);
-    //   });
-    // }
-  }, [isClicked]);
 
   return (
     <LunchMenuContainer>
