@@ -28,7 +28,8 @@ const LunchMenuContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  height: 800px;
+  overflow: scroll;
 `;
 
 const StyledText = styled.h2`
@@ -38,9 +39,12 @@ const StyledText = styled.h2`
 `;
 
 const LunchMenuWrapper = styled.ul`
+  padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px 16px;
-  width: 100%;
   place-items: center;
+  @media screen and (max-width: 1400px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
 `;

@@ -36,8 +36,7 @@ const Restaurant = ({
 export default Restaurant;
 
 const RestaurantContainer = styled.li`
-  width: 50%;
-  max-width: 400px;
+  max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
