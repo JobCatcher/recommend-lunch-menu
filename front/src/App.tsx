@@ -40,3 +40,7 @@ const Flex = styled.div`
     align-items: center;
   }
 `;
+
+const Flex = styled.div`
+  display: flex;
+`;
