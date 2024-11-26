@@ -21,6 +21,7 @@ jobs:
       # 3. Docker 이미지 빌드 및 푸시
       - name: Build and Push Docker Image
         run: |
+          cd back
           docker build -t moonminhyuk1/restaurant:latest .
           docker push moonminhyuk1/restaurant:latest
 
@@ -32,6 +33,7 @@ jobs:
           username: ${{ secrets.SERVER1_USER }}
           key: ${{ secrets.SERVER1_SSH_KEY }}
           script: |
+            cd /path/to/your/project/back
             docker pull moonminhyuk1/restaurant:latest
             docker stop restaurant || true
             docker rm restaurant || true
@@ -45,6 +47,7 @@ jobs:
           username: ${{ secrets.SERVER2_USER }}
           key: ${{ secrets.SERVER2_SSH_KEY }}
           script: |
+            cd /path/to/your/project/back
             docker pull moonminhyuk1/restaurant:latest
             docker stop restaurant || true
             docker rm restaurant || true
