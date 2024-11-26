@@ -22,14 +22,21 @@ const HomeContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  @media (max-width: 320px) {
+    width: 320px;
+  }
 `;
 
 const MainTitle = styled.h1`
   font-size: 32px;
   font-weight: 700;
-  margin-bottom: 12px;
+  margin: 12px 0;
 `;
 
 const Flex = styled.div`
   display: flex;
+  @media (max-width: 720px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
