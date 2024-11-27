@@ -22,7 +22,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           cd back
-          docker build -t moonminhyuk1/restaurant:latest .
+          docker build -t moonminhyuk1/restaurant:latest ./back
           docker push moonminhyuk1/restaurant:latest
 
       # 4. 서버1에 배포
