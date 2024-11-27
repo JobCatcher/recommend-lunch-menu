@@ -22,7 +22,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           cd back
-          docker build -t moonminhyuk1/restaurant:latest ./back
+          docker build -t moonminhyuk1/restaurant:latest .
           docker push moonminhyuk1/restaurant:latest
 
       # 4. 서버1에 배포
@@ -33,7 +33,6 @@ jobs:
           username: ${{ secrets.SERVER1_USER }}
           key: ${{ secrets.SERVER1_SSH_KEY }}
           script: |
-            cd /path/to/your/project/back
             docker pull moonminhyuk1/restaurant:latest
             docker stop restaurant || true
             docker rm restaurant || true
@@ -47,7 +46,6 @@ jobs:
           username: ${{ secrets.SERVER2_USER }}
           key: ${{ secrets.SERVER2_SSH_KEY }}
           script: |
-            cd /path/to/your/project/back
             docker pull moonminhyuk1/restaurant:latest
             docker stop restaurant || true
             docker rm restaurant || true
