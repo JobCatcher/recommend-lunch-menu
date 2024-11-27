@@ -35,7 +35,7 @@ const MainTitle = styled.h1`
 
 const Flex = styled.div`
   display: flex;
-  @media (max-width: 720px) {
+  @media (max-width: 1000px) {
     flex-direction: column;
     align-items: center;
   }
