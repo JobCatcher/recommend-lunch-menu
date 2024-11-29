@@ -40,3 +40,9 @@ export const getDongName = async (longitude: number, latitude: number) => {
   }
   return address_name;
 };
+
+export const isMobile = () => {
+  let isMobile = navigator.userAgentData?.mobile;
+
+  return !!isMobile;
+};
