@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import data from "../../data/data.json";
 import ReactDOMServer from "react-dom/server";
-import { getDongName, handleClickRestaurant } from "../utils/utils";
+import { getDongName, handleClickRestaurant, isMobile } from "../utils/utils";
 import Restaurant from "./Restaurant";
 import {
   KakaoInfoWindow,
@@ -23,6 +23,10 @@ const Map = () => {
 
   let dongName = "";
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+  const mobile = isMobile();
+
+  let width = mobile ? "300px" : "700px";
+  let height = mobile ? "400px" : "800px";
 
   // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
   const makeOverListener = (
@@ -152,7 +156,15 @@ const Map = () => {
     };
   }, [mapKey]);
 
-  return <div id="map" style={{ width: "750px", height: "500px" }}></div>;
+  return (
+    <div
+      id="map"
+      style={{
+        width,
+        height,
+      }}
+    ></div>
+  );
 };
 
 export default Map;
