@@ -30,6 +30,9 @@ public class Restaurant {
     @Column(name = "longitude", nullable = false)
     private Double longitude; //경도
 
+    @Column(name = "geo_hash", nullable = true)
+    private String geoHash;
+
     @Column(name = "rating", nullable = false)
     private Double rating;
 
@@ -40,17 +43,24 @@ public class Restaurant {
     @Column(name = "category", nullable = false)
     private Category category;
 
-    @Column(name = "thumbnails")
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @ElementCollection
+//    @CollectionTable(name = "restaurant_thumbnail", joinColumns = @JoinColumn(name = "restaurant_id"))
+//    @AttributeOverride(name = "id", column = @Column(name = "thumbnail_id"))
+    @Transient
     private List<Thumbnail> thumbnails = new ArrayList<>();
 
     @Builder
-    public Restaurant(String title, Double latitude, Double longitude, Double rating, Integer reviewCount, Category category) {
+    public Restaurant(String title, Double latitude, Double longitude, String geoHash, Double rating, Integer reviewCount, Category category) {
         this.title = title;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.geoHash = geoHash;
         this.rating = rating;
         this.reviewCount = reviewCount;
         this.category = category;
+    }
+
+    public void updateGeoHash(String geoHash) {
+        this.geoHash = geoHash;
     }
 }
