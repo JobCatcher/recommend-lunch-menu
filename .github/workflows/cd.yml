@@ -24,7 +24,7 @@ jobs:
       # 3. prod 설정 파일 저장
       - name: Save prod application.yml
         run: |
-          echo "${{ secrets.APPLICATION_PROD }}" > back/src/main/resources/application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > back/src/main/resources/application.yml
 
       # 4. Gradle 빌드
       - name: Build with Gradle
