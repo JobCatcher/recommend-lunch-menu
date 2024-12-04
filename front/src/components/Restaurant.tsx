@@ -1,27 +1,24 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
 import {navigateToRestaurant} from '../utils/utils';
-import {useAtom} from 'jotai';
+import {useAtom, useAtomValue} from 'jotai';
 import {restaurantsAtom} from '../stores/restaurantAtom';
+import {mapAtom} from '../stores/mapAtom';
 
-const Restaurant = ({
-  id,
-  title,
-  category,
-  reviewCount,
-  rating,
-  thumbnails,
-}: RestaurantInfo) => {
+const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
   const [activeRestaurant, setActiveRestaurant] = useAtom(restaurantsAtom);
+  const map = useAtomValue(mapAtom);
 
   const handleClickRestaurant = () => {
     const {activeRestaurantId} = activeRestaurant;
     if (activeRestaurantId && activeRestaurantId === id) {
       navigateToRestaurant(title);
+
       return;
     }
 
     setActiveRestaurant({activeRestaurantId: id});
+    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
   };
 
   return (
@@ -29,11 +26,7 @@ const Restaurant = ({
       <ImageContainer>
         {thumbnails.map((image, idx) => {
           return (
-            <img
-              key={`${title}-${idx}`}
-              src={image || 'https://via.placeholder.com/150'}
-              alt={`${title} 이미지`}
-            />
+            <img key={`${title}-${idx}`} src={image || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />
           );
         })}
       </ImageContainer>
