@@ -1,21 +1,22 @@
-import { useState } from "react";
-import data from "../../data/data.json";
-import styled from "@emotion/styled";
+import {useState} from 'react';
+import data from '../../data/data.json';
+import styled from '@emotion/styled';
 
-import Restaurant from "./Restaurant";
-import { RestaurantInfo } from "../types/restaurant";
+import Restaurant from './Restaurant';
+import {RestaurantInfo} from '../types/restaurant';
+import {useAtomValue} from 'jotai';
+import {restaurantsAtom} from '../stores/restaurantAtom';
 
 const LunchMenu = () => {
-  const [restaurants] = useState<RestaurantInfo[]>(data);
+  const {restaurants: stores} = useAtomValue(restaurantsAtom);
+  const [restaurants] = useState<RestaurantInfo[]>(stores || data.meal);
 
   return (
     <LunchMenuContainer>
       <StyledText>추천 메뉴</StyledText>
       <LunchMenuWrapper>
         {restaurants.map((restaurant, idx) => {
-          return (
-            <Restaurant key={`${restaurant.title}-${idx}`} {...restaurant} />
-          );
+          return <Restaurant key={`${restaurant.title}-${idx}`} {...restaurant} />;
         })}
       </LunchMenuWrapper>
     </LunchMenuContainer>

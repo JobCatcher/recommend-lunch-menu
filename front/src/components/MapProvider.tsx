@@ -1,12 +1,12 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import Data from '../../data/data.json';
 import ReactDOMServer from 'react-dom/server';
-import {getDongName, isMobile, navigateToRestaurant} from '../utils/utils';
+import {getDongName, navigateToRestaurant} from '../utils/utils';
 import Restaurant from './Restaurant';
 import {KakaoInfoWindow, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom} from 'jotai';
-import {restaurantsAtom} from '../stores/restaurantAtom';
+import {clickedRestaurantAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
 
 declare global {
@@ -26,6 +26,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   let dongName = '';
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
   const [, setMapAtom] = useAtom(mapAtom);
+  const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
 
   // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
   const makeOverListener = (map: KakaoMap, marker: KakaoMarker, infowindow: KakaoInfoWindow) => {
@@ -45,7 +46,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     const {id, title, latitude, longitude} = restaurant;
     // closure 환경으로 함수 내부에서 active한 변수 참조
     const restaurantStore = getDefaultStore();
-    const {activeRestaurantId} = restaurantStore.get(restaurantsAtom);
+    const {activeRestaurantId} = restaurantStore.get(clickedRestaurantAtom);
 
     console.log(typeof activeRestaurantId, typeof id, activeRestaurantId, id);
 
@@ -61,7 +62,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       //   yAnchor: 0.91,
       // });
       // customOverlay.setMap(map);
-      restaurantStore.set(restaurantsAtom, {activeRestaurantId: id});
+      restaurantStore.set(clickedRestaurantAtom, {activeRestaurantId: id});
       return () => {};
     }
 
@@ -84,6 +85,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         //   .then((res) => res.json());
 
         setRestaurants(Data.meal);
+        setRestaurantsAtom({restaurants: Data.meal});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
       }

@@ -2,11 +2,11 @@ import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
 import {navigateToRestaurant} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
-import {restaurantsAtom} from '../stores/restaurantAtom';
+import {clickedRestaurantAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
 
 const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
-  const [activeRestaurant, setActiveRestaurant] = useAtom(restaurantsAtom);
+  const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
   const map = useAtomValue(mapAtom);
 
   const handleClickRestaurant = () => {
