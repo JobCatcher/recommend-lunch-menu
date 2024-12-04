@@ -1,7 +1,7 @@
-import { useEffect } from "react";
-import data from "../../data/data.json";
+import { useEffect, useState } from "react";
+import Data from "../../data/data.json";
 import ReactDOMServer from "react-dom/server";
-import { getDongName, handleClickRestaurant, isMobile } from "../utils/utils";
+import { getDongName, isMobile, navigateToRestaurant } from "../utils/utils";
 import Restaurant from "./Restaurant";
 import {
   KakaoInfoWindow,
@@ -9,6 +9,9 @@ import {
   KakaoMarker,
   KakaoNamespace,
 } from "../types/kakao";
+import { RestaurantInfo } from "../types/restaurant";
+import { getDefaultStore } from "jotai";
+import { restaurantsAtom } from "../stores/restaurantAtom";
 
 declare global {
   interface Window {
@@ -18,8 +21,11 @@ declare global {
 
 const Map = () => {
   // 서울 중심 좌표
-  let latitude: number = 37.5665,
-    longitude: number = 126.978;
+  const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
+  const [coordinates, setCoordinates] = useState({
+    latitude: 37.5665,
+    longitude: 126.978,
+  });
 
   let dongName = "";
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
@@ -46,18 +52,37 @@ const Map = () => {
     };
   };
 
-  const navigateTo = (title: string, dongName: string) => {
-    return () => handleClickRestaurant(title, dongName || "");
+  const navigateTo = (title: string, id: number, dongName: string) => {
+    // closure 환경으로 함수 내부에서 active한 변수 참조
+    const restaurantStore = getDefaultStore();
+    const { activeRestaurantId } = restaurantStore.get(restaurantsAtom);
+
+    console.log(typeof activeRestaurantId, typeof id, activeRestaurantId, id);
+    
+    if (activeRestaurantId !== id) {
+      restaurantStore.set(restaurantsAtom, { activeRestaurantId: id });
+      return () => {};
+    }
+    
+    return () => navigateToRestaurant(title, dongName || "");
   };
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async (position) => {
-      latitude = position.coords.latitude;
-      longitude = position.coords.longitude;
+      const { latitude, longitude } = position.coords;
+      setCoordinates({ latitude, longitude });
 
       try {
         const data = await getDongName(longitude, latitude);
         dongName = data;
+
+        // const fetchRestaurants = await fetch(
+        //   // `http://192.168.166.48:8080/restaurants/search?latitude=37.37836077986753&longitude=127.1141486781632`
+        //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`
+        // )
+        //   .then((res) => res.json());
+
+        setRestaurants(Data.meal);
       } catch (error) {
         console.error("Error On KAKAO API(GET Dong Name):", error);
       }
@@ -69,13 +94,15 @@ const Map = () => {
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false`;
     script.async = true;
 
+    const { latitude, longitude } = coordinates;
+
+    if (!latitude && !longitude) {
+      throw new Error("위치 정보를 받아오지 못하였습니다.");
+    }
+
     script.onload = () => {
       // Kakao Maps SDK 로드 후 초기화
       window.kakao.maps.load(() => {
-        if (!latitude && !longitude) {
-          throw new Error("위치 정보를 받아오지 못하였습니다.");
-        }
-
         const container = document.getElementById("map");
         const options = {
           center: new window.kakao.maps.LatLng(latitude, longitude),
@@ -89,11 +116,12 @@ const Map = () => {
         const map = new window.kakao.maps.Map(container, options);
         let marker;
 
-        for (let i = 0; i < data.length; i++) {
+        // 음식점 마커 생성 및 표시
+        for (let i = 0; i < restaurants?.length; i++) {
           const imageSize = new window.kakao.maps.Size(24, 35);
           const latlng = new window.kakao.maps.LatLng(
-            data[i].latitude,
-            data[i].longitude
+            restaurants?.[i].latitude,
+            restaurants?.[i].longitude
           );
 
           // 마커 이미지를 생성합니다
@@ -111,9 +139,8 @@ const Map = () => {
 
           // 마커에 표시할 인포윈도우를 생성합니다
           const infowindow = new window.kakao.maps.InfoWindow({
-            // content: `<div style='padding: 4px; font-size: 12px; color: black;'>${data[i].title}(${data[i].category}) 별점: ${data[i].rating}</div>`, // 인포윈도우에 표시할 내용
             content: `${ReactDOMServer.renderToString(
-              <Restaurant {...data[i]} />
+              <Restaurant {...restaurants?.[i]} />
             )}`,
           });
 
@@ -131,7 +158,7 @@ const Map = () => {
             makeOutListener(infowindow)
           );
           window.kakao.maps.event.addListener(marker, "click", () =>
-            navigateTo(data[i].title, dongName || "")()
+            navigateTo(restaurants?.[i].title ?? "", restaurants?.[i].id ?? -1, dongName ?? "")()
           );
         }
 
@@ -154,7 +181,7 @@ const Map = () => {
       // 컴포넌트 언마운트 시 스크립트 제거
       document.head.removeChild(script);
     };
-  }, [mapKey]);
+  }, [coordinates, restaurants, mapKey]);
 
   return (
     <div

@@ -1,22 +1,37 @@
-import styled from "@emotion/styled";
-import { RestaurantInfo } from "../types/restaurant";
-import { handleClickRestaurant } from "../utils/utils";
+import styled from '@emotion/styled';
+import {RestaurantInfo} from '../types/restaurant';
+import {navigateToRestaurant} from '../utils/utils';
+import {useAtom} from 'jotai';
+import {restaurantsAtom} from '../stores/restaurantAtom';
 
 const Restaurant = ({
+  id,
   title,
   category,
-  countOfVisitorReview,
+  reviewCount,
   rating,
-  images,
+  thumbnails,
 }: RestaurantInfo) => {
+  const [activeRestaurant, setActiveRestaurant] = useAtom(restaurantsAtom);
+
+  const handleClickRestaurant = () => {
+    const {activeRestaurantId} = activeRestaurant;
+    if (activeRestaurantId && activeRestaurantId === id) {
+      navigateToRestaurant(title);
+      return;
+    }
+
+    setActiveRestaurant({activeRestaurantId: id});
+  };
+
   return (
-    <RestaurantContainer onClick={() => handleClickRestaurant(title)}>
+    <RestaurantContainer onClick={handleClickRestaurant}>
       <ImageContainer>
-        {images.map((image, idx) => {
+        {thumbnails.map((image, idx) => {
           return (
             <img
               key={`${title}-${idx}`}
-              src={image || "https://via.placeholder.com/150"}
+              src={image || 'https://via.placeholder.com/150'}
               alt={`${title} 이미지`}
             />
           );
@@ -26,7 +41,7 @@ const Restaurant = ({
         <Title>{title}</Title>
         <Category>{category}</Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
-        <Review>리뷰: {countOfVisitorReview}</Review>
+        <Review>리뷰: {reviewCount}</Review>
         <Rating>별점: {rating}</Rating>
       </InfoContainer>
     </RestaurantContainer>
@@ -57,7 +72,7 @@ const RestaurantContainer = styled.li`
 const ImageContainer = styled.div`
   display: flex;
   margin-bottom: 12px;
-  width: 90%;
+  width: 100%;
   overflow-x: scroll;
 
   img {
