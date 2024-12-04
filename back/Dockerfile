@@ -5,4 +5,4 @@ FROM --platform=linux/amd64 openjdk:21-jdk-slim
 COPY build/libs/restaurant-0.0.1-SNAPSHOT.jar /app.jar
 
 # 컨테이너 시작 시 실행할 명령어
-ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]
