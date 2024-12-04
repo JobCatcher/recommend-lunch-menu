@@ -7,7 +7,7 @@ export const getNumbers = (text: unknown) => {
   return "";
 };
 
-export const handleClickRestaurant = async (
+export const navigateToRestaurant = async (
   storeName: string,
   dongName?: string
 ) => {

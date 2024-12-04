@@ -1,24 +1,53 @@
-import styled from "@emotion/styled";
-import { RestaurantInfo } from "../types/restaurant";
-import { handleClickRestaurant } from "../utils/utils";
+import styled from '@emotion/styled';
+import {RestaurantInfo} from '../types/restaurant';
+import {navigateToRestaurant} from '../utils/utils';
+import {useAtom, useAtomValue} from 'jotai';
+import {clickedRestaurantAtom} from '../stores/restaurantAtom';
+import {mapAtom, markerAtom} from '../stores/mapAtom';
 
-const Restaurant = ({
-  title,
-  category,
-  countOfVisitorReview,
-  rating,
-  images,
-}: RestaurantInfo) => {
+const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
+  const map = useAtomValue(mapAtom);
+  const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
+  const [activeMarkerAtom, setActiveMarkerAtom] = useAtom(markerAtom);
+
+  const setMaker = () => {
+    if (activeMarkerAtom) {
+      activeMarkerAtom.setMap(null);
+    }
+
+    const imageSrc = '/active.png';
+    const imageSize = new window.kakao.maps.Size(28, 38);
+    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
+
+    let marker = new window.kakao.maps.Marker({
+      map: map!,
+      position: new window.kakao.maps.LatLng(latitude, longitude),
+      image: markerImage,
+    });
+
+    marker.setMap(map);
+    setActiveMarkerAtom(marker);
+  };
+
+  const handleClickRestaurant = () => {
+    const {activeRestaurantId} = activeRestaurant;
+    if (activeRestaurantId && activeRestaurantId === id) {
+      navigateToRestaurant(title);
+
+      return;
+    }
+
+    setMaker();
+    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
+    setActiveRestaurant({activeRestaurantId: id});
+  };
+
   return (
-    <RestaurantContainer onClick={() => handleClickRestaurant(title)}>
+    <RestaurantContainer onClick={handleClickRestaurant}>
       <ImageContainer>
-        {images.map((image, idx) => {
+        {thumbnails.map((image, idx) => {
           return (
-            <img
-              key={`${title}-${idx}`}
-              src={image || "https://via.placeholder.com/150"}
-              alt={`${title} 이미지`}
-            />
+            <img key={`${title}-${idx}`} src={image || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />
           );
         })}
       </ImageContainer>
@@ -26,7 +55,7 @@ const Restaurant = ({
         <Title>{title}</Title>
         <Category>{category}</Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
-        <Review>리뷰: {countOfVisitorReview}</Review>
+        <Review>리뷰: {reviewCount}</Review>
         <Rating>별점: {rating}</Rating>
       </InfoContainer>
     </RestaurantContainer>
@@ -57,7 +86,7 @@ const RestaurantContainer = styled.li`
 const ImageContainer = styled.div`
   display: flex;
   margin-bottom: 12px;
-  width: 90%;
+  width: 100%;
   overflow-x: scroll;
 
   img {
