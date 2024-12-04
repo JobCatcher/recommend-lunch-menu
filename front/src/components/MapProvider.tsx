@@ -116,19 +116,18 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
         // 지도 생성
         const map = new window.kakao.maps.Map(container, options);
-        let marker;
+        let restaurantMarker: KakaoMarker;
 
         // 음식점 마커 생성 및 표시
         for (let i = 0; i < restaurants?.length; i++) {
           const latlng = new window.kakao.maps.LatLng(restaurants?.[i].latitude, restaurants?.[i].longitude);
-
           const imageSize = new window.kakao.maps.Size(24, 35);
 
           // 마커 이미지를 생성합니다
           const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
           // 마커를 생성합니다
-          marker = new window.kakao.maps.Marker({
+          restaurantMarker = new window.kakao.maps.Marker({
             map: map, // 마커를 표시할 지도
             position: latlng, // 마커를 표시할 위치
             image: markerImage, // 마커 이미지
@@ -142,20 +141,24 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
           // 이벤트 리스너로는 클로저를 만들어 등록합니다
           // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
-          window.kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
-          window.kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
-          window.kakao.maps.event.addListener(marker, 'click', () => {
+          window.kakao.maps.event.addListener(
+            restaurantMarker,
+            'mouseover',
+            makeOverListener(map, restaurantMarker, infowindow),
+          );
+          window.kakao.maps.event.addListener(restaurantMarker, 'mouseout', makeOutListener(infowindow));
+          window.kakao.maps.event.addListener(restaurantMarker, 'click', () => {
             navigateTo(map, restaurants?.[i], dongName ?? '')();
           });
         }
 
         // 지도에 마커 추가 (옵션)
         const currentPosition = new window.kakao.maps.LatLng(latitude, longitude);
-        marker = new window.kakao.maps.Marker({
+        const currentPositionMarker = new window.kakao.maps.Marker({
           position: currentPosition,
         });
 
-        marker.setMap(map);
+        currentPositionMarker.setMap(map);
         setMapAtom(map);
       });
     };
