@@ -2,12 +2,32 @@ import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
 import {navigateToRestaurant} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
-import {clickedRestaurantAtom, restaurantsAtom} from '../stores/restaurantAtom';
-import {mapAtom} from '../stores/mapAtom';
+import {clickedRestaurantAtom} from '../stores/restaurantAtom';
+import {mapAtom, markerAtom} from '../stores/mapAtom';
 
 const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
-  const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
   const map = useAtomValue(mapAtom);
+  const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
+  const [activeMarkerAtom, setActiveMarkerAtom] = useAtom(markerAtom);
+
+  const setMaker = () => {
+    if (activeMarkerAtom) {
+      activeMarkerAtom.setMap(null);
+    }
+
+    const imageSrc = '/active.png';
+    const imageSize = new window.kakao.maps.Size(28, 38);
+    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
+
+    let marker = new window.kakao.maps.Marker({
+      map: map!,
+      position: new window.kakao.maps.LatLng(latitude, longitude),
+      image: markerImage,
+    });
+
+    marker.setMap(map);
+    setActiveMarkerAtom(marker);
+  };
 
   const handleClickRestaurant = () => {
     const {activeRestaurantId} = activeRestaurant;
@@ -17,8 +37,9 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
       return;
     }
 
-    setActiveRestaurant({activeRestaurantId: id});
+    setMaker();
     map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
+    setActiveRestaurant({activeRestaurantId: id});
   };
 
   return (
