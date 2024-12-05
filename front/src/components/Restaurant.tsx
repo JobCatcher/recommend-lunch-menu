@@ -10,7 +10,7 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
   const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
   const [activeMarkerAtom, setActiveMarkerAtom] = useAtom(markerAtom);
 
-  const setMaker = () => {
+  const setActiveMarker = () => {
     if (activeMarkerAtom) {
       activeMarkerAtom.setMap(null);
     }
@@ -37,7 +37,7 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
       return;
     }
 
-    setMaker();
+    setActiveMarker();
     map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
     setActiveRestaurant({activeRestaurantId: id});
   };
