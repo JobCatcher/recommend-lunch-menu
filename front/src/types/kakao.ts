@@ -34,6 +34,7 @@ interface KakaoMarkerOptions {
   map?: KakaoMap;
   position: KakaoLatLng;
   image?: KakaoMarkerImage;
+  clickable?: boolean;
 }
 
 export interface KakaoMarker {
@@ -41,7 +42,9 @@ export interface KakaoMarker {
 }
 
 interface KakaoInfoWindowOptions {
-  content: string;
+  content?: string;
+  removable?: boolean;
+  position?: KakaoLatLng;
 }
 
 export interface KakaoInfoWindow {
