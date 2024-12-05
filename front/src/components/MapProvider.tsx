@@ -7,7 +7,7 @@ import {KakaoInfoWindow, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/k
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom} from 'jotai';
 import {clickedRestaurantAtom, restaurantsAtom} from '../stores/restaurantAtom';
-import {mapAtom} from '../stores/mapAtom';
+import {infoWindowAtom, mapAtom} from '../stores/mapAtom';
 
 declare global {
   interface Window {
@@ -16,8 +16,9 @@ declare global {
 }
 
 const MapProvider = ({children}: {children: React.ReactNode}) => {
-  // 서울 중심 좌표
+  const [isLoading, setIsLoading] = useState(false);
   const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
+  // 서울 중심 좌표
   const [coordinates, setCoordinates] = useState({
     latitude: 37.5665,
     longitude: 126.978,
@@ -29,44 +30,17 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
 
   // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
-  const makeOverListener = (map: KakaoMap, marker: KakaoMarker, infowindow: KakaoInfoWindow) => {
-    return function () {
-      infowindow.open(map, marker);
+  const clickListener = (map: KakaoMap, marker: KakaoMarker, infowindow: KakaoInfoWindow, id: number) => {
+    return () => {
+      const infoWindowStore = getDefaultStore();
+      const activeInfoWindowAtom = infoWindowStore.get(infoWindowAtom);
+
+      if (activeInfoWindowAtom !== infowindow) {
+        activeInfoWindowAtom?.close();
+        infoWindowStore.set(infoWindowAtom, infowindow);
+        return infowindow.open(map, marker);
+      }
     };
-  };
-
-  // 인포윈도우를 닫는 클로저를 만드는 함수입니다
-  const makeOutListener = (infowindow: KakaoInfoWindow) => {
-    return function () {
-      infowindow.close();
-    };
-  };
-
-  const navigateTo = (map: KakaoMap, restaurant: RestaurantInfo, dongName: string) => {
-    const {id, title, latitude, longitude} = restaurant;
-    // closure 환경으로 함수 내부에서 active한 변수 참조
-    const restaurantStore = getDefaultStore();
-    const {activeRestaurantId} = restaurantStore.get(clickedRestaurantAtom);
-
-    console.log(typeof activeRestaurantId, typeof id, activeRestaurantId, id);
-
-    if (activeRestaurantId !== id) {
-      map.panTo(new window.kakao.maps.LatLng(latitude, longitude));
-      // const content = ReactDOMServer.renderToString(
-      //   <Restaurant restaurant={restaurant} />
-      // );
-      // const customOverlay = new window.kakao.maps.CustomOverlay({
-      //   position: new window.kakao.maps.LatLng(latitude, longitude),
-      //   content: content,
-      //   xAnchor: 0.6,
-      //   yAnchor: 0.91,
-      // });
-      // customOverlay.setMap(map);
-      restaurantStore.set(clickedRestaurantAtom, {activeRestaurantId: id});
-      return () => {};
-    }
-
-    return () => navigateToRestaurant(title, dongName || '');
   };
 
   useEffect(() => {
@@ -80,12 +54,14 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
         // const fetchRestaurants = await fetch(
         //   // `http://192.168.166.48:8080/restaurants/search?latitude=37.37836077986753&longitude=127.1141486781632`
-        //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`
-        // )
-        //   .then((res) => res.json());
+        //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
+        //   // `http://192.168.166.48:8080/restaurants/all`,
+        // ).then(res => res.json());
 
         setRestaurants(Data.meal);
         setRestaurantsAtom({restaurants: Data.meal});
+        // setRestaurants(fetchRestaurants);
+        // setRestaurantsAtom({restaurants: fetchRestaurants});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
       }
@@ -93,6 +69,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   }, []);
 
   useEffect(() => {
+    setIsLoading(true);
     const script = document.createElement('script');
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false`;
     script.async = true;
@@ -131,25 +108,21 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
             map: map, // 마커를 표시할 지도
             position: latlng, // 마커를 표시할 위치
             image: markerImage, // 마커 이미지
+            clickable: true,
           });
 
           // 마커에 표시할 인포윈도우를 생성합니다
           const infowindow = new window.kakao.maps.InfoWindow({
+            position: latlng,
             content: `${ReactDOMServer.renderToString(<Restaurant {...restaurants?.[i]} />)}`,
+            removable: true,
           });
 
-          // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
-          // 이벤트 리스너로는 클로저를 만들어 등록합니다
-          // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
           window.kakao.maps.event.addListener(
             restaurantMarker,
-            'mouseover',
-            makeOverListener(map, restaurantMarker, infowindow),
+            'click',
+            clickListener(map, restaurantMarker, infowindow, restaurants?.[i].id),
           );
-          window.kakao.maps.event.addListener(restaurantMarker, 'mouseout', makeOutListener(infowindow));
-          window.kakao.maps.event.addListener(restaurantMarker, 'click', () => {
-            navigateTo(map, restaurants?.[i], dongName ?? '')();
-          });
         }
 
         // 지도에 마커 추가 (옵션)
@@ -164,6 +137,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     };
 
     document.head.appendChild(script);
+    setIsLoading(false);
 
     return () => {
       // 컴포넌트 언마운트 시 스크립트 제거
@@ -171,7 +145,8 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     };
   }, [coordinates, restaurants, mapKey]);
 
-  return <>{children}</>;
+  return <>{isLoading ? <>loading...</> : children}</>;
+  // return <>{children}</>;
 };
 
 export default MapProvider;
