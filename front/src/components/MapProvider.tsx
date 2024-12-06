@@ -1,13 +1,13 @@
 import {useEffect, useState} from 'react';
 import Data from '../../data/data.json';
 import ReactDOMServer from 'react-dom/server';
-import {getDongName, navigateToRestaurant} from '../utils/utils';
+import {getDongName, setActiveMarker} from '../utils/utils';
 import Restaurant from './Restaurant';
 import {KakaoInfoWindow, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom} from 'jotai';
 import {clickedRestaurantAtom, restaurantsAtom} from '../stores/restaurantAtom';
-import {infoWindowAtom, mapAtom} from '../stores/mapAtom';
+import {infoWindowAtom, mapAtom, markerAtom} from '../stores/mapAtom';
 
 declare global {
   interface Window {
@@ -16,6 +16,7 @@ declare global {
 }
 
 const MapProvider = ({children}: {children: React.ReactNode}) => {
+  let map: KakaoMap;
   const [isLoading, setIsLoading] = useState(false);
   const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
   // 서울 중심 좌표
@@ -30,21 +31,38 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
 
   // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
-  const clickListener = (map: KakaoMap, marker: KakaoMarker, infowindow: KakaoInfoWindow, id: number) => {
+  const clickListener = (
+    map: KakaoMap,
+    marker: KakaoMarker,
+    infowindow: KakaoInfoWindow,
+    restaurant: RestaurantInfo,
+  ) => {
     return () => {
-      const infoWindowStore = getDefaultStore();
-      const activeInfoWindowAtom = infoWindowStore.get(infoWindowAtom);
+      const {latitude, longitude, id} = restaurant;
+      const store = getDefaultStore();
+      const activeInfoWindowAtom = store.get(infoWindowAtom);
+      const activeMarkerAtom = store.get(markerAtom);
 
       if (activeInfoWindowAtom !== infowindow) {
         activeInfoWindowAtom?.close();
-        infoWindowStore.set(infoWindowAtom, infowindow);
+        activeMarkerAtom?.setMap(null);
+
+        const activeMarker = setActiveMarker(map, activeMarkerAtom, latitude, longitude);
+
+        store.set(infoWindowAtom, infowindow);
+        store.set(markerAtom, activeMarker);
         return infowindow.open(map, marker);
       }
     };
   };
 
+  const tempHandler = function () {
+    alert('center changed!');
+  };
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async position => {
+      setIsLoading(true);
       const {latitude, longitude} = position.coords;
       setCoordinates({latitude, longitude});
 
@@ -64,12 +82,13 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         // setRestaurantsAtom({restaurants: fetchRestaurants});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
+      } finally {
+        setIsLoading(false);
       }
     });
   }, []);
 
   useEffect(() => {
-    setIsLoading(true);
     const script = document.createElement('script');
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false`;
     script.async = true;
@@ -92,7 +111,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png';
 
         // 지도 생성
-        const map = new window.kakao.maps.Map(container, options);
+        map = new window.kakao.maps.Map(container, options);
         let restaurantMarker: KakaoMarker;
 
         // 음식점 마커 생성 및 표시
@@ -115,13 +134,13 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           const infowindow = new window.kakao.maps.InfoWindow({
             position: latlng,
             content: `${ReactDOMServer.renderToString(<Restaurant {...restaurants?.[i]} />)}`,
-            removable: true,
+            // removable: true,
           });
 
           window.kakao.maps.event.addListener(
             restaurantMarker,
             'click',
-            clickListener(map, restaurantMarker, infowindow, restaurants?.[i].id),
+            clickListener(map, restaurantMarker, infowindow, restaurants?.[i]),
           );
         }
 
@@ -137,7 +156,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     };
 
     document.head.appendChild(script);
-    setIsLoading(false);
 
     return () => {
       // 컴포넌트 언마운트 시 스크립트 제거
