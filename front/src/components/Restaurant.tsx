@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {navigateToRestaurant} from '../utils/utils';
+import {navigateToRestaurant, setActiveMarker} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom} from '../stores/restaurantAtom';
 import {mapAtom, markerAtom} from '../stores/mapAtom';
@@ -10,34 +10,17 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
   const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
   const [activeMarkerAtom, setActiveMarkerAtom] = useAtom(markerAtom);
 
-  const setActiveMarker = () => {
-    if (activeMarkerAtom) {
-      activeMarkerAtom.setMap(null);
-    }
-
-    const imageSrc = '/active.png';
-    const imageSize = new window.kakao.maps.Size(28, 38);
-    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
-
-    let marker = new window.kakao.maps.Marker({
-      map: map!,
-      position: new window.kakao.maps.LatLng(latitude, longitude),
-      image: markerImage,
-    });
-
-    marker.setMap(map);
-    setActiveMarkerAtom(marker);
-  };
-
   const handleClickRestaurant = () => {
     const {activeRestaurantId} = activeRestaurant;
     if (activeRestaurantId && activeRestaurantId === id) {
       navigateToRestaurant(title);
-
       return;
     }
 
-    setActiveMarker();
+    const activeMarker = setActiveMarker(map, activeMarkerAtom, latitude, longitude);
+    window.kakao.maps.event.trigger(activeMarker, 'click'); // 마커 클릭 이벤트 발생시키기
+    setActiveMarkerAtom(activeMarker);
+
     map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
     setActiveRestaurant({activeRestaurantId: id});
   };
