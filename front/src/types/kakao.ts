@@ -11,7 +11,9 @@ interface KakaoMaps {
   Size: new (width: number, height: number) => KakaoSize;
   load: (callback: () => void) => void;
   event: {
+    trigger: (target: KakaoMarker | KakaoMap, type: string) => void;
     addListener: (target: KakaoMarker | KakaoMap, type: string, callback: (...args: unknown[]) => void) => void;
+    removeListener: (target: KakaoMarker | KakaoMap, type: string, callback: (...args: unknown[]) => void) => void;
   };
 }
 
