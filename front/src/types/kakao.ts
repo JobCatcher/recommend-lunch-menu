@@ -30,6 +30,7 @@ interface KakaoMapOptions {
 export interface KakaoMap {
   panTo(latlng: KakaoLatLng): void;
   setCenter: (latlng: KakaoLatLng) => void;
+  getCenter: () => KakaoLatLng;
 }
 
 interface KakaoMarkerOptions {
