@@ -30,6 +30,16 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
 
+  // 인포윈도우 내 닫기 버튼 클릭 시 인포윈도우 닫히는 이벤트
+  const closeInfoWindow = (activeMarker: KakaoMarker) => {
+    const closeButton = document.querySelector('[alt="close"]');
+    if (closeButton) {
+      closeButton.addEventListener('click', () => {
+        activeMarker.setMap(null);
+      });
+    }
+  };
+
   // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
   const clickListener = (
     map: KakaoMap,
@@ -51,7 +61,9 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
         store.set(infoWindowAtom, infowindow);
         store.set(markerAtom, activeMarker);
-        return infowindow.open(map, marker);
+        infowindow.open(map, marker);
+        closeInfoWindow(activeMarker);
+        return;
       }
     };
   };
@@ -134,7 +146,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           const infowindow = new window.kakao.maps.InfoWindow({
             position: latlng,
             content: `${ReactDOMServer.renderToString(<Restaurant {...restaurants?.[i]} />)}`,
-            // removable: true,
+            removable: true,
           });
 
           window.kakao.maps.event.addListener(
@@ -164,7 +176,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   }, [coordinates, restaurants, mapKey]);
 
   return <>{isLoading ? <>loading...</> : children}</>;
-  // return <>{children}</>;
 };
 
 export default MapProvider;
