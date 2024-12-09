@@ -81,7 +81,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   }, []);
 
   useEffect(() => {
-    const temp = async () => {
+    const getRestaurants = async () => {
       try {
         const {longitude, latitude} = coordinates;
         const data = await getDongName(longitude, latitude);
@@ -103,7 +103,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       } finally {
       }
     };
-    temp();
+    getRestaurants();
   }, [coordinates]);
 
   useEffect(() => {
