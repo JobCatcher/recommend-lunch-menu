@@ -68,37 +68,43 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     };
   };
 
-  const tempHandler = function () {
-    alert('center changed!');
+  const centerChangedHandler = (map: KakaoMap) => {
+    const latLng = map.getCenter();
+    setCoordinates({latitude: latLng.getLat(), longitude: latLng.getLng()});
   };
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async position => {
-      setIsLoading(true);
       const {latitude, longitude} = position.coords;
       setCoordinates({latitude, longitude});
+    });
+  }, []);
 
+  useEffect(() => {
+    const temp = async () => {
       try {
+        const {longitude, latitude} = coordinates;
         const data = await getDongName(longitude, latitude);
         dongName = data;
 
-        // const fetchRestaurants = await fetch(
-        //   // `http://192.168.166.48:8080/restaurants/search?latitude=37.37836077986753&longitude=127.1141486781632`
-        //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
-        //   // `http://192.168.166.48:8080/restaurants/all`,
-        // ).then(res => res.json());
+        const fetchRestaurants = await fetch(
+          `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
+          // `http://192.168.166.48:8080/restaurants/all`,
+        ).then(res => res.json());
 
-        setRestaurants(Data.meal);
-        setRestaurantsAtom({restaurants: Data.meal});
-        // setRestaurants(fetchRestaurants);
-        // setRestaurantsAtom({restaurants: fetchRestaurants});
+        console.log('음식점 data: ', fetchRestaurants);
+
+        // setRestaurants(Data.meal);
+        // setRestaurantsAtom({restaurants: Data.meal});
+        setRestaurants(fetchRestaurants);
+        setRestaurantsAtom({restaurants: fetchRestaurants});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
       } finally {
-        setIsLoading(false);
       }
-    });
-  }, []);
+    };
+    temp();
+  }, [coordinates]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -106,6 +112,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     script.async = true;
 
     const {latitude, longitude} = coordinates;
+    console.log('위도&경도: ', latitude, longitude);
 
     if (!latitude && !longitude) {
       throw new Error('위치 정보를 받아오지 못하였습니다.');
@@ -161,6 +168,8 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         const currentPositionMarker = new window.kakao.maps.Marker({
           position: currentPosition,
         });
+
+        window.kakao.maps.event.addListener(map, 'dragend', () => centerChangedHandler(map));
 
         currentPositionMarker.setMap(map);
         setMapAtom(map);
