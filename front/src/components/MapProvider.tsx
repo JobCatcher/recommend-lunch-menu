@@ -6,7 +6,7 @@ import Restaurant from './Restaurant';
 import {KakaoInfoWindow, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom} from 'jotai';
-import {clickedRestaurantAtom, restaurantsAtom} from '../stores/restaurantAtom';
+import {restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {infoWindowAtom, mapAtom, markerAtom} from '../stores/mapAtom';
 
 declare global {
@@ -24,11 +24,16 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     latitude: 37.5665,
     longitude: 126.978,
   });
+  const [currentPosition, setCurrentPosition] = useState({
+    latitude: 0,
+    longitude: 0,
+  });
 
   let dongName = '';
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
+  const [, setRestaurantMarkersAtom] = useAtom(restaurantMarkersAtom);
 
   // 인포윈도우 내 닫기 버튼 클릭 시 인포윈도우 닫히는 이벤트
   const closeInfoWindow = (activeMarker: KakaoMarker) => {
@@ -77,6 +82,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     navigator.geolocation.getCurrentPosition(async position => {
       const {latitude, longitude} = position.coords;
       setCoordinates({latitude, longitude});
+      setCurrentPosition({latitude, longitude});
     });
   }, []);
 
@@ -87,17 +93,17 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         const data = await getDongName(longitude, latitude);
         dongName = data;
 
-        const fetchRestaurants = await fetch(
-          `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
-          // `http://192.168.166.48:8080/restaurants/all`,
-        ).then(res => res.json());
+        // const fetchRestaurants = await fetch(
+        //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
+        //   // `http://192.168.166.48:8080/restaurants/all`,
+        // ).then(res => res.json());
 
-        console.log('음식점 data: ', fetchRestaurants);
+        // console.log('음식점 data: ', fetchRestaurants);
 
-        // setRestaurants(Data.meal);
-        // setRestaurantsAtom({restaurants: Data.meal});
-        setRestaurants(fetchRestaurants);
-        setRestaurantsAtom({restaurants: fetchRestaurants});
+        setRestaurants(Data.meal);
+        setRestaurantsAtom({restaurants: Data.meal});
+        // setRestaurants(fetchRestaurants);
+        // setRestaurantsAtom({restaurants: fetchRestaurants});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
       } finally {
@@ -112,6 +118,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     script.async = true;
 
     const {latitude, longitude} = coordinates;
+    const {latitude: curLat, longitude: curLong} = currentPosition;
     console.log('위도&경도: ', latitude, longitude);
 
     if (!latitude && !longitude) {
@@ -131,7 +138,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
         // 지도 생성
         map = new window.kakao.maps.Map(container, options);
-        let restaurantMarker: KakaoMarker;
+        let restaurantMarkers: KakaoMarker[] = new Array(restaurants.length);
 
         // 음식점 마커 생성 및 표시
         for (let i = 0; i < restaurants?.length; i++) {
@@ -142,7 +149,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
           // 마커를 생성합니다
-          restaurantMarker = new window.kakao.maps.Marker({
+          restaurantMarkers[i] = new window.kakao.maps.Marker({
             map: map, // 마커를 표시할 지도
             position: latlng, // 마커를 표시할 위치
             image: markerImage, // 마커 이미지
@@ -157,14 +164,14 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           });
 
           window.kakao.maps.event.addListener(
-            restaurantMarker,
+            restaurantMarkers[i],
             'click',
-            clickListener(map, restaurantMarker, infowindow, restaurants?.[i]),
+            clickListener(map, restaurantMarkers[i], infowindow, restaurants?.[i]),
           );
         }
 
         // 지도에 마커 추가 (옵션)
-        const currentPosition = new window.kakao.maps.LatLng(latitude, longitude);
+        const currentPosition = new window.kakao.maps.LatLng(curLat, curLong);
         const currentPositionMarker = new window.kakao.maps.Marker({
           position: currentPosition,
         });
@@ -173,6 +180,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
         currentPositionMarker.setMap(map);
         setMapAtom(map);
+        setRestaurantMarkersAtom({markers: restaurantMarkers});
       });
     };
 
