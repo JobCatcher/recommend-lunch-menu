@@ -113,6 +113,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   }, [coordinates]);
 
   useEffect(() => {
+    let toBeMap: Array<[number, KakaoMarker]> = [];
     const script = document.createElement('script');
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false`;
     script.async = true;
@@ -163,6 +164,8 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
             removable: true,
           });
 
+          toBeMap.push([restaurants?.[i].id, restaurantMarkers[i]]);
+
           window.kakao.maps.event.addListener(
             restaurantMarkers[i],
             'click',
@@ -180,7 +183,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
         currentPositionMarker.setMap(map);
         setMapAtom(map);
-        setRestaurantMarkersAtom({markers: restaurantMarkers});
+        setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
       });
     };
 
