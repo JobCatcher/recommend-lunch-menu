@@ -61,3 +61,11 @@ export const setActiveMarker = (map: any, activeMarkerAtom: any, latitude: numbe
   marker.setMap(map);
   return marker;
 };
+
+export const triggerEvent = (type: 'click', object: unknown) => {
+  if (type === 'click') {
+    if (object instanceof window.kakao.maps.Marker) {
+      window.kakao.maps.event.trigger(object, 'click');
+    }
+  }
+};
