@@ -45,7 +45,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     }
   };
 
-  // 인포윈도우를 표시하는 클로저를 만드는 함수입니다
+  // 식당 마커 클릭 시 오픈되며, 인포윈도우를 표시하는 클로저를 만드는 함수입니다
   const clickListener = (
     map: KakaoMap,
     marker: KakaoMarker,
@@ -53,20 +53,26 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     restaurant: RestaurantInfo,
   ) => {
     return () => {
-      const {latitude, longitude, id} = restaurant;
+      const {latitude, longitude} = restaurant;
       const store = getDefaultStore();
       const activeInfoWindowAtom = store.get(infoWindowAtom);
       const activeMarkerAtom = store.get(markerAtom);
 
       if (activeInfoWindowAtom !== infowindow) {
+        // close previous InfoWindow
         activeInfoWindowAtom?.close();
-        activeMarkerAtom?.setMap(null);
 
+        // 1. delete prev activeMarker
+        // 2. put new activeMarker
         const activeMarker = setActiveMarker(map, activeMarkerAtom, latitude, longitude);
+
+        // open new InfoWindow
+        infowindow.open(map, marker);
 
         store.set(infoWindowAtom, infowindow);
         store.set(markerAtom, activeMarker);
-        infowindow.open(map, marker);
+
+        // add eventListener On close button
         closeInfoWindow(activeMarker);
         return;
       }
