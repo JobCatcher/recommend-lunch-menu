@@ -7,14 +7,23 @@ import {restaurantsAtom} from '../stores/restaurantAtom';
 const LunchMenu = () => {
   const {restaurants} = useAtomValue(restaurantsAtom);
 
-  return (
-    <LunchMenuContainer>
-      <StyledText>추천 메뉴</StyledText>
-      <LunchMenuWrapper>
+  const getContents = () => {
+    if (!restaurants.length) {
+      return <li>추천메뉴가 없습니다..🥲</li>;
+    }
+    return (
+      <>
         {restaurants.map((restaurant, idx) => {
           return <Restaurant key={`${restaurant.title}-${idx}`} {...restaurant} />;
         })}
-      </LunchMenuWrapper>
+      </>
+    );
+  };
+
+  return (
+    <LunchMenuContainer>
+      <StyledText>추천 메뉴</StyledText>
+      <LunchMenuWrapper noContents={!restaurants.length}>{getContents()}</LunchMenuWrapper>
     </LunchMenuContainer>
   );
 };
@@ -35,7 +44,7 @@ const StyledText = styled.h2`
   margin: 16px 0;
 `;
 
-const LunchMenuWrapper = styled.ul`
+const LunchMenuWrapper = styled.ul<{noContents: boolean}>`
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -44,4 +53,5 @@ const LunchMenuWrapper = styled.ul`
   @media screen and (max-width: 1400px) {
     grid-template-columns: repeat(1, 1fr);
   }
+  ${({noContents}) => (noContents ? `display: flex; min-width: 500px; justify-content: center;` : '')}
 `;

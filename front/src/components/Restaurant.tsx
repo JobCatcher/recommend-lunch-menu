@@ -1,45 +1,21 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {navigateToRestaurant} from '../utils/utils';
+import {triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
-import {clickedRestaurantAtom} from '../stores/restaurantAtom';
-import {mapAtom, markerAtom} from '../stores/mapAtom';
+import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
+import {mapAtom} from '../stores/mapAtom';
 
 const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
   const map = useAtomValue(mapAtom);
-  const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
-  const [activeMarkerAtom, setActiveMarkerAtom] = useAtom(markerAtom);
-
-  const setMaker = () => {
-    if (activeMarkerAtom) {
-      activeMarkerAtom.setMap(null);
-    }
-
-    const imageSrc = '/active.png';
-    const imageSize = new window.kakao.maps.Size(28, 38);
-    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
-
-    let marker = new window.kakao.maps.Marker({
-      map: map!,
-      position: new window.kakao.maps.LatLng(latitude, longitude),
-      image: markerImage,
-    });
-
-    marker.setMap(map);
-    setActiveMarkerAtom(marker);
-  };
+  const {markers} = useAtomValue(restaurantMarkersAtom);
+  const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
 
   const handleClickRestaurant = () => {
-    const {activeRestaurantId} = activeRestaurant;
-    if (activeRestaurantId && activeRestaurantId === id) {
-      navigateToRestaurant(title);
+    const mapMarker = markers.get(id);
+    triggerEvent('click', mapMarker); // 인포윈도우 띄우기
 
-      return;
-    }
-
-    setMaker();
-    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
     setActiveRestaurant({activeRestaurantId: id});
+    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
   };
 
   return (
@@ -64,21 +40,24 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
 
 export default Restaurant;
 
+const Title = styled.h3`
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 5px;
+`;
+
 const RestaurantContainer = styled.li`
   max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  background-color: #fff;
+  background-color: #fafcff;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
-  &:hover {
-    transform: translateY(-4px);
-  }
   cursor: pointer;
   overflow: hidden;
 `;
@@ -101,12 +80,6 @@ const InfoContainer = styled.div`
   margin-left: 15px;
   display: flex;
   flex-direction: column;
-`;
-
-const Title = styled.h3`
-  font-size: 18px;
-  font-weight: bold;
-  margin: 0 0 5px;
 `;
 
 const Category = styled.p`
