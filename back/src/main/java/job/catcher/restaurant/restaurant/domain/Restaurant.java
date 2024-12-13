@@ -63,4 +63,8 @@ public class Restaurant {
     public void updateGeoHash(String geoHash) {
         this.geoHash = geoHash;
     }
+
+    public void addThumbnail(Thumbnail thumbnail) {
+        this.thumbnails.add(thumbnail);
+    }
 }
