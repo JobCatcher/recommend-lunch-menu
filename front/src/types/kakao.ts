@@ -7,6 +7,7 @@ interface KakaoMaps {
   Map: new (container: HTMLElement | null, options: KakaoMapOptions) => KakaoMap;
   Marker: new (options: KakaoMarkerOptions) => KakaoMarker;
   InfoWindow: new (options: KakaoInfoWindowOptions) => KakaoInfoWindow;
+  CustomOverlay: new (options: KakaoCustomOverlayOptions) => KakaoCustomOverlay;
   MarkerImage: new (src: string, size: KakaoSize) => KakaoMarkerImage;
   Size: new (width: number, height: number) => KakaoSize;
   load: (callback: () => void) => void;
@@ -50,9 +51,20 @@ interface KakaoInfoWindowOptions {
   position?: KakaoLatLng;
 }
 
+interface KakaoCustomOverlayOptions {
+  content: string;
+  position: KakaoLatLng;
+  xAnchor?: number;
+  yAnchor?: number;
+}
+
 export interface KakaoInfoWindow {
   open: (map: KakaoMap, marker: KakaoMarker) => void;
   close: () => void;
+}
+
+export interface KakaoCustomOverlay extends KakaoInfoWindow {
+  setMap: (map: KakaoMap | null) => void;
 }
 
 type KakaoMarkerImage = object;
