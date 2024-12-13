@@ -2,12 +2,12 @@ import {useEffect, useState} from 'react';
 import Data from '../../data/data.json';
 import ReactDOMServer from 'react-dom/server';
 import {getDongName, setActiveMarker} from '../utils/utils';
-import Restaurant from './Restaurant';
-import {KakaoInfoWindow, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
+import {KakaoCustomOverlay, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom} from 'jotai';
 import {restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
-import {infoWindowAtom, mapAtom, markerAtom} from '../stores/mapAtom';
+import {customOverayAtom, mapAtom, markerAtom} from '../stores/mapAtom';
+import RestaurantOverlay from './RestaurantOverlay';
 
 declare global {
   interface Window {
@@ -36,44 +36,40 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const [, setRestaurantMarkersAtom] = useAtom(restaurantMarkersAtom);
 
   // 인포윈도우 내 닫기 버튼 클릭 시 인포윈도우 닫히는 이벤트
-  const closeInfoWindow = (activeMarker: KakaoMarker) => {
+  const closeInfoWindow = (activeMarker: KakaoMarker, customOverlay: KakaoCustomOverlay) => {
     const closeButton = document.querySelector('[alt="close"]');
     if (closeButton) {
       closeButton.addEventListener('click', () => {
         activeMarker.setMap(null);
+        customOverlay.setMap(null);
       });
     }
   };
 
   // 식당 마커 클릭 시 오픈되며, 인포윈도우를 표시하는 클로저를 만드는 함수입니다
-  const clickListener = (
-    map: KakaoMap,
-    marker: KakaoMarker,
-    infowindow: KakaoInfoWindow,
-    restaurant: RestaurantInfo,
-  ) => {
+  const clickListener = (map: KakaoMap, customOverlay: KakaoCustomOverlay, restaurant: RestaurantInfo) => {
     return () => {
       const {latitude, longitude} = restaurant;
       const store = getDefaultStore();
-      const activeInfoWindowAtom = store.get(infoWindowAtom);
+      const activeOverayAtom = store.get(customOverayAtom);
       const activeMarkerAtom = store.get(markerAtom);
 
-      if (activeInfoWindowAtom !== infowindow) {
-        // close previous InfoWindow
-        activeInfoWindowAtom?.close();
+      if (activeOverayAtom !== customOverlay) {
+        // close previous customOverlay
+        activeOverayAtom?.setMap(null);
 
         // 1. delete prev activeMarker
         // 2. put new activeMarker
         const activeMarker = setActiveMarker(map, activeMarkerAtom, latitude, longitude);
 
-        // open new InfoWindow
-        infowindow.open(map, marker);
+        // open new customOverlay
+        customOverlay.setMap(map);
 
-        store.set(infoWindowAtom, infowindow);
+        store.set(customOverayAtom, customOverlay);
         store.set(markerAtom, activeMarker);
 
         // add eventListener On close button
-        closeInfoWindow(activeMarker);
+        closeInfoWindow(activeMarker, customOverlay);
         return;
       }
     };
@@ -152,10 +148,10 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           const latlng = new window.kakao.maps.LatLng(restaurants?.[i].latitude, restaurants?.[i].longitude);
           const imageSize = new window.kakao.maps.Size(24, 35);
 
-          // 마커 이미지를 생성합니다
+          // 마커 이미지를 생성
           const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
-          // 마커를 생성합니다
+          // 마커 생성
           restaurantMarkers[i] = new window.kakao.maps.Marker({
             map: map, // 마커를 표시할 지도
             position: latlng, // 마커를 표시할 위치
@@ -163,11 +159,15 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
             clickable: true,
           });
 
-          // 마커에 표시할 인포윈도우를 생성합니다
-          const infowindow = new window.kakao.maps.InfoWindow({
-            position: latlng,
-            content: `${ReactDOMServer.renderToString(<Restaurant {...restaurants?.[i]} />)}`,
-            removable: true,
+          // 마커에 표시될 customOverlay
+          const customOverlay = new window.kakao.maps.CustomOverlay({
+            position: new window.kakao.maps.LatLng(
+              restaurants?.[i].latitude + 0.00045,
+              restaurants?.[i].longitude - 0.00045,
+            ), // 마커를 표시할 위치
+            content: `${ReactDOMServer.renderToString(<RestaurantOverlay restaurant={restaurants?.[i]} />)}`,
+            xAnchor: 0.3,
+            yAnchor: 0.91,
           });
 
           toBeMap.push([restaurants?.[i].id, restaurantMarkers[i]]);
@@ -175,7 +175,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           window.kakao.maps.event.addListener(
             restaurantMarkers[i],
             'click',
-            clickListener(map, restaurantMarkers[i], infowindow, restaurants?.[i]),
+            clickListener(map, customOverlay, restaurants?.[i]),
           );
         }
 
