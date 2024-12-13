@@ -12,7 +12,7 @@ public class TestController {
 
     @GetMapping
     public String hello() {
-        return "hello";
+        return "hello restaurant";
     }
 
     @GetMapping("/test")

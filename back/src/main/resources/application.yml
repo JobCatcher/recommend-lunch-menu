@@ -1,7 +1,3 @@
 spring:
-  application:
-    name: restaurant
-  server:
-    port: 8080
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+  profiles:
+    active: local
