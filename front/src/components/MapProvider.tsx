@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import Data from '../../data/data.json';
 import ReactDOMServer from 'react-dom/server';
-import {getDongName, setActiveMarker} from '../utils/utils';
+import {setActiveMarker} from '../utils/utils';
 import {KakaoCustomOverlay, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom} from 'jotai';
@@ -17,7 +17,7 @@ declare global {
 
 const MapProvider = ({children}: {children: React.ReactNode}) => {
   let map: KakaoMap;
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
   // 서울 중심 좌표
   const [coordinates, setCoordinates] = useState({
@@ -29,7 +29,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     longitude: 0,
   });
 
-  let dongName = '';
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
@@ -91,9 +90,9 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   useEffect(() => {
     const getRestaurants = async () => {
       try {
-        const {longitude, latitude} = coordinates;
-        const data = await getDongName(longitude, latitude);
-        dongName = data;
+        // const {longitude, latitude} = coordinates;
+        // const data = await getDongName(longitude, latitude);
+        // dongName = data;
 
         // const fetchRestaurants = await fetch(
         //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
