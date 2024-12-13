@@ -40,21 +40,24 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
 
 export default Restaurant;
 
+const Title = styled.h3`
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 5px;
+`;
+
 const RestaurantContainer = styled.li`
   max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  background-color: #fff;
+  background-color: #fafcff;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
-  &:hover {
-    transform: translateY(-4px);
-  }
   cursor: pointer;
   overflow: hidden;
 `;
@@ -77,12 +80,6 @@ const InfoContainer = styled.div`
   margin-left: 15px;
   display: flex;
   flex-direction: column;
-`;
-
-const Title = styled.h3`
-  font-size: 18px;
-  font-weight: bold;
-  margin: 0 0 5px;
 `;
 
 const Category = styled.p`
