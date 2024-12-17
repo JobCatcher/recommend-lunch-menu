@@ -1,5 +1,6 @@
 package job.catcher.restaurant.restaurant.dto;
 
+import com.querydsl.core.annotations.QueryProjection;
 import job.catcher.restaurant.restaurant.domain.Restaurant;
 import job.catcher.restaurant.thumbnail.domain.Thumbnail;
 import lombok.Builder;
@@ -16,6 +17,18 @@ public record RestaurantResponseDto(
         int reviewCount,
         List<ThumbnailResponseDto> thumbnails
 ) {
+    @QueryProjection
+    public RestaurantResponseDto(long restaurantId, String title, double latitude, double longitude,
+                                 Double rating, int reviewCount, List<ThumbnailResponseDto> thumbnails) {
+        this.restaurantId = restaurantId;
+        this.title = title;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+        this.thumbnails = thumbnails;
+    }
+
     public static RestaurantResponseDto from(Restaurant restaurant, List<ThumbnailResponseDto> thumbnails) {
         return RestaurantResponseDto.builder()
                 .restaurantId(restaurant.getId())
@@ -33,6 +46,12 @@ public record RestaurantResponseDto(
             long thumbnailId,
             String url
     ) {
+        @QueryProjection
+        public ThumbnailResponseDto(long thumbnailId, String url) {
+            this.thumbnailId = thumbnailId;
+            this.url = url;
+        }
+
         public static ThumbnailResponseDto from(Thumbnail thumbnail) {
             return ThumbnailResponseDto.builder()
                     .thumbnailId(thumbnail.getId())

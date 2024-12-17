@@ -17,7 +17,7 @@ public class RestaurantController {
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude
     ) {
-        return ApiResponse.success(restaurantService.searchRestaurant(latitude, longitude));
+        return ApiResponse.success(restaurantService.searchRestaurantV1(latitude, longitude));
     }
 
     @GetMapping("/all")
