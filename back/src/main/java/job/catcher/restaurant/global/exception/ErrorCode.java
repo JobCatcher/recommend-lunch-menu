@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    EXCEPTION_EXAMPLE(HttpStatus.BAD_REQUEST, "Exception Example")
+    FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "파일은 10MB 미만이어야 합니다."),
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "파일은 이미지 형식만 업로드할 수 있습니다."),
+    UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "파일 업로드 중 문제가 발생했습니다.")
     ;
 
     private final HttpStatus httpStatus;

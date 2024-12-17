@@ -1,4 +1,10 @@
-import { atom } from "jotai";
-import restaurants from "../../data/data.json";
+import {atom} from 'jotai';
+import {RestaurantInfo} from '../types/restaurant';
 
-export const restaurantsAtom = atom(restaurants);
+export const clickedRestaurantAtom = atom({
+  activeRestaurantId: 0,
+});
+
+export const restaurantsAtom = atom<{restaurants: RestaurantInfo[]}>({
+  restaurants: [],
+});

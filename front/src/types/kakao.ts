@@ -4,21 +4,14 @@ export interface KakaoNamespace {
 
 interface KakaoMaps {
   LatLng: new (latitude: number, longitude: number) => KakaoLatLng;
-  Map: new (
-    container: HTMLElement | null,
-    options: KakaoMapOptions
-  ) => KakaoMap;
+  Map: new (container: HTMLElement | null, options: KakaoMapOptions) => KakaoMap;
   Marker: new (options: KakaoMarkerOptions) => KakaoMarker;
   InfoWindow: new (options: KakaoInfoWindowOptions) => KakaoInfoWindow;
   MarkerImage: new (src: string, size: KakaoSize) => KakaoMarkerImage;
   Size: new (width: number, height: number) => KakaoSize;
   load: (callback: () => void) => void;
   event: {
-    addListener: (
-      target: KakaoMarker | KakaoMap,
-      type: string,
-      callback: (...args: unknown[]) => void
-    ) => void;
+    addListener: (target: KakaoMarker | KakaoMap, type: string, callback: (...args: unknown[]) => void) => void;
   };
 }
 
@@ -33,6 +26,7 @@ interface KakaoMapOptions {
 }
 
 export interface KakaoMap {
+  panTo(latlng: KakaoLatLng): void;
   setCenter: (latlng: KakaoLatLng) => void;
 }
 
