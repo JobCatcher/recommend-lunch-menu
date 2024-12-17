@@ -93,24 +93,21 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const setMarkers = (map: KakaoMap) => {
     const restaurantMarkers: KakaoMarker[] = new Array(restaurants.length);
     const restaurantMarkerImage = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png';
-    const {latitude, longitude} = coordinates;
 
     if (zoomLevel > 5) {
-      const circleImage =
-        'https://maps-service.pstatic.net/pcweb_navermap_v5/241212-c6893f5/assets/sprites/new_marker@2x.png';
-      const imageSize = new window.kakao.maps.Size(24, 24);
+      // 마커 클러스터러를 생성합니다
+      const clusterer = new window.kakao.maps.MarkerClusterer({
+        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+        minLevel: 6, // 클러스터 할 최소 지도 레벨
+      });
 
-      // 마커 이미지를 생성
-      const markerImage = new window.kakao.maps.MarkerImage(Circle, imageSize);
+      console.log(
+        'ff1: ',
+        restaurants.map(({latitude: lat, longitude: lng}) => ({lat, lng})),
+      );
 
-      // 마커 생성
-      new window.kakao.maps.Marker({
-        map: map, // 마커를 표시할 지도
-        position: new window.kakao.maps.LatLng(latitude, longitude), // 마커를 표시할 위치
-        image: markerImage, // 마커 이미지
-        clickable: true,
-      }).setZIndex(1);
-
+      clusterer.addMarkers(restaurants.map(({latitude: lat, longitude: lng}) => ({lat, lng})));
       return;
     }
 
@@ -150,6 +147,39 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     }
   };
 
+  const onLoadKakaoMap = (latitude: number, longitude: number, curLat: number, curLong: number) => {
+    window.kakao.maps.load(() => {
+      const container = document.getElementById('map');
+      const options = {
+        center: new window.kakao.maps.LatLng(latitude, longitude),
+        level: zoomLevel, // 지도 확대 레벨
+      };
+
+      // 지도 생성
+      map = new window.kakao.maps.Map(container, options);
+
+      // 음식점 마커 생성 및 표시
+      setMarkers(map);
+
+      // 지도에 마커 추가 (옵션)
+      const currentPosition = new window.kakao.maps.LatLng(curLat, curLong);
+      const currentPositionMarker = new window.kakao.maps.Marker({
+        position: currentPosition,
+      });
+
+      window.kakao.maps.event.addListener(map, 'dragend', () => centerChangedHandler(map));
+      window.kakao.maps.event.addListener(map, 'zoom_changed', () => zoomChangedHandler(map));
+
+      currentPositionMarker.setMap(map);
+      setMapAtom(map);
+      setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
+    });
+    // script.onload = () => {
+    //   // Kakao Maps SDK 로드 후 초기화
+
+    // };
+  };
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(async position => {
       const {latitude, longitude} = position.coords;
@@ -187,7 +217,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   useEffect(() => {
     const script = document.createElement('script');
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false`;
-    script.async = true;
+    // script.async = true;
 
     const {latitude, longitude} = coordinates;
     const {latitude: curLat, longitude: curLong} = currentPosition;
@@ -197,37 +227,9 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       throw new Error('위치 정보를 받아오지 못하였습니다.');
     }
 
-    script.onload = () => {
-      // Kakao Maps SDK 로드 후 초기화
-      window.kakao.maps.load(() => {
-        const container = document.getElementById('map');
-        const options = {
-          center: new window.kakao.maps.LatLng(latitude, longitude),
-          level: zoomLevel, // 지도 확대 레벨
-        };
-
-        // 지도 생성
-        map = new window.kakao.maps.Map(container, options);
-
-        // 음식점 마커 생성 및 표시
-        setMarkers(map);
-
-        // 지도에 마커 추가 (옵션)
-        const currentPosition = new window.kakao.maps.LatLng(curLat, curLong);
-        const currentPositionMarker = new window.kakao.maps.Marker({
-          position: currentPosition,
-        });
-
-        window.kakao.maps.event.addListener(map, 'dragend', () => centerChangedHandler(map));
-        window.kakao.maps.event.addListener(map, 'zoom_changed', () => zoomChangedHandler(map));
-
-        currentPositionMarker.setMap(map);
-        setMapAtom(map);
-        setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
-      });
-    };
-
     document.head.appendChild(script);
+
+    script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
 
     return () => {
       // 컴포넌트 언마운트 시 스크립트 제거
