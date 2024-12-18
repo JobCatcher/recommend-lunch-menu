@@ -1,3 +1,9 @@
+/**
+ * 1 - km
+ * 1000 - m
+ */
+const DISTANCE = 1000;
+
 export const getNumbers = (text: unknown) => {
   if (typeof text === 'string') {
     // 정규식을 사용하여 숫자 패턴(쉼표 포함)을 모두 추출
@@ -75,7 +81,7 @@ export const getDistanceFromLatLonInKm = (lat1: number, lng1: number, lat2: numb
   function deg2rad(deg: number) {
     return deg * (Math.PI / 180);
   }
-  const R = 6371; // Radius of the earth in km
+  const R = 6371 * DISTANCE; // Radius of the earth in km
   const dLat = deg2rad(lat2 - lat1); // deg2rad below
   const dLon = deg2rad(lng2 - lng1);
   const a =
@@ -83,5 +89,5 @@ export const getDistanceFromLatLonInKm = (lat1: number, lng1: number, lat2: numb
     Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const d = R * c; // Distance in km
-  return d;
+  return d.toFixed(2);
 };
