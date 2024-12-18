@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import Data from '../../data/data.json';
 import ReactDOMServer from 'react-dom/server';
-import {setActiveMarker, triggerEvent} from '../utils/utils';
+import {setActiveMarker} from '../utils/utils';
 import {KakaoCustomOverlay, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom, useAtomValue} from 'jotai';
@@ -102,12 +102,14 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         minLevel: 6, // 클러스터 할 최소 지도 레벨
       });
 
-      console.log(
-        'ff1: ',
-        restaurants.map(({latitude: lat, longitude: lng}) => ({lat, lng})),
+      const markers = restaurants.map(
+        ({latitude, longitude}) =>
+          new window.kakao.maps.Marker({
+            position: new window.kakao.maps.LatLng(latitude, longitude),
+          }),
       );
 
-      clusterer.addMarkers(restaurants.map(({latitude: lat, longitude: lng}) => ({lat, lng})));
+      clusterer.addMarkers(markers);
       return;
     }
 
@@ -216,8 +218,8 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false`;
-    // script.async = true;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false&libraries=clusterer`;
+    script.defer = true;
 
     const {latitude, longitude} = coordinates;
     const {latitude: curLat, longitude: curLong} = currentPosition;
