@@ -1,11 +1,19 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {triggerEvent} from '../utils/utils';
+import {getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
 
-const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
+interface RestaurantProps {
+  restaurant: RestaurantInfo;
+  currentPosition?: {latitude: number; longitude: number};
+}
+
+const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
+  if (!restaurant) return;
+
+  const {id, title, category, reviewCount, rating, thumbnails, latitude, longitude} = restaurant;
   const map = useAtomValue(mapAtom);
   const {markers} = useAtomValue(restaurantMarkersAtom);
   const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
@@ -28,11 +36,22 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
         })}
       </ImageContainer>
       <InfoContainer>
-        <Title>{title}</Title>
-        <Category>{category}</Category>
+        <Title>{title} </Title>
+        <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
-        <Review>리뷰: {reviewCount}</Review>
-        <Rating>별점: {rating}</Rating>
+        <Review>
+          리뷰: {reviewCount} / 별점: {rating}
+        </Review>
+        <Rating>
+          {currentPosition ? (
+            <span>
+              거리:{' '}
+              {getDistanceFromLatLonInKm(latitude, longitude, currentPosition.latitude, currentPosition.longitude)}
+            </span>
+          ) : (
+            <></>
+          )}
+        </Rating>
       </InfoContainer>
     </RestaurantContainer>
   );
