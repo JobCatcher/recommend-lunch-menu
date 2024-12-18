@@ -134,7 +134,9 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
           restaurants?.[i].latitude + 0.00045,
           restaurants?.[i].longitude - 0.00045,
         ), // 마커를 표시할 위치
-        content: `${ReactDOMServer.renderToString(<RestaurantOverlay restaurant={restaurants?.[i]} />)}`,
+        content: `${ReactDOMServer.renderToString(
+          <RestaurantOverlay key={restaurants[i].id} restaurant={restaurants[i]} currentPosition={currentPosition} />,
+        )}`,
         xAnchor: 0.3,
         yAnchor: 0.91,
       });

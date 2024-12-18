@@ -14,7 +14,7 @@ const LunchMenu = () => {
     return (
       <>
         {restaurants.map((restaurant, idx) => {
-          return <Restaurant key={`${restaurant.title}-${idx}`} {...restaurant} />;
+          return <Restaurant key={`${restaurant.title}-${idx}`} restaurant={restaurant} />;
         })}
       </>
     );

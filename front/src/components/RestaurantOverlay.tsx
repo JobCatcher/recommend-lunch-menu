@@ -3,7 +3,12 @@ import {RestaurantInfo} from '../types/restaurant';
 import Restaurant from './Restaurant';
 import close from '../../public/close.png';
 
-const RestaurantOverlay = ({restaurant}: {restaurant: RestaurantInfo}) => {
+interface RestaurantOverlayProps {
+  restaurant: RestaurantInfo;
+  currentPosition: {latitude: number; longitude: number};
+}
+
+const RestaurantOverlay = ({restaurant, currentPosition}: RestaurantOverlayProps) => {
   return (
     // RestaurantOverlay 컴포넌트는 KakaoMap 내 RenderToString 함수를 통해 문자열로 변환되는데,
     // 이 때 스타일이 적용되지 않는 문제가 발생합니다.
@@ -15,7 +20,7 @@ const RestaurantOverlay = ({restaurant}: {restaurant: RestaurantInfo}) => {
     // 이 정도의 공수를 들여야 할 필요는 없기에, inline으로 간다!
     <Wrapper>
       <Image src={close} style={{position: 'absolute', width: '32px', right: '0', cursor: 'pointer'}} alt="close" />
-      <Restaurant {...restaurant} />
+      <Restaurant restaurant={restaurant} currentPosition={currentPosition} />
     </Wrapper>
   );
 };
