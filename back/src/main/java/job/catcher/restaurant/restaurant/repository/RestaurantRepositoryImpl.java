@@ -29,6 +29,7 @@ public class RestaurantRepositoryImpl implements RestaurantRepositoryCustom {
                                 .and(thumbnail.tableName.eq(TableName.valueOf("RESTAURANT")))
                 )
                 .where(restaurant.geoHash.in(geoHashs))
+                .orderBy(restaurant.id.asc(), thumbnail.id.asc())
                 .transform(
                         groupBy(restaurant.id)
                         .list(new QRestaurantResponseDto(
