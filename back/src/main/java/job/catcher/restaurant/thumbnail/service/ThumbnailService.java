@@ -22,7 +22,7 @@ public class ThumbnailService {
 
     private final S3Service s3Service;
 
-    public Thumbnail uploadThumbnail(MultipartFile multipartFile, Long recordId) {
+    public Thumbnail uploadThumbnail(MultipartFile multipartFile, String tableName, Long recordId) {
         String originalName = multipartFile.getOriginalFilename();
         String name = path + UUID.randomUUID() + getFileExtension(originalName);
         String url = s3Service.uploadFile(multipartFile, name);
@@ -30,7 +30,7 @@ public class ThumbnailService {
                 .name(name)
                 .originalName(originalName)
                 .url(url)
-                .tableName(TableName.RESTAURANT)
+                .tableName(TableName.findByValue(tableName))
                 .recordId(recordId)
                 .build();
         thumbnailRepository.save(thumbnail);
