@@ -73,25 +73,22 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       const activeOverayAtom = store.get(customOverayAtom);
       const activeMarkerAtom = store.get(markerAtom);
 
-      if (activeOverayAtom !== customOverlay) {
-        // close previous customOverlay
-        activeOverayAtom?.setMap(null);
+      // close previous customOverlay
+      activeOverayAtom?.setMap(null);
 
-        // 1. delete prev activeMarker
-        // 2. put new activeMarker
-        const activeMarker = setActiveMarker(map, activeMarkerAtom, latitude, longitude);
+      // 1. delete prev activeMarker
+      // 2. put new activeMarker
+      const activeMarker = setActiveMarker(map, activeMarkerAtom, latitude, longitude);
 
-        // open new customOverlay
-        customOverlay.setMap(map);
+      // open new customOverlay
+      customOverlay.setMap(map);
 
-        store.set(customOverayAtom, customOverlay);
-        store.set(markerAtom, activeMarker);
-        store.set(clickedRestaurantAtom, {activeRestaurantId: id});
+      store.set(customOverayAtom, customOverlay);
+      store.set(markerAtom, activeMarker);
+      store.set(clickedRestaurantAtom, {activeRestaurantId: id});
 
-        // add eventListener On close button
-        addEvListenerOnCustomOverlay(activeMarker, customOverlay, restaurant);
-        return;
-      }
+      // add eventListener On close button
+      addEvListenerOnCustomOverlay(activeMarker, customOverlay, restaurant);
     };
   };
 
