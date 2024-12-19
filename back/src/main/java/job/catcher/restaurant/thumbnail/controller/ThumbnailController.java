@@ -17,8 +17,9 @@ public class ThumbnailController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Object> uploadThumbnail(
             @RequestPart("thumbnail") MultipartFile multipartFile,
+            @RequestParam("tableName") String tableName,
             @RequestParam("recordId") Long recordId
     ) {
-        return ApiResponse.success(thumbnailService.uploadThumbnail(multipartFile, recordId));
+        return ApiResponse.success(thumbnailService.uploadThumbnail(multipartFile, tableName, recordId));
     }
 }
