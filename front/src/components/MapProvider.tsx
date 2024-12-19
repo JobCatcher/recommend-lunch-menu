@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import Data from '../../data/data.json';
 import ReactDOMServer from 'react-dom/server';
-import {setActiveMarker} from '../utils/utils';
+import {getDongName, navigateToRestaurant, setActiveMarker} from '../utils/utils';
 import {KakaoCustomOverlay, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {getDefaultStore, useAtom, useAtomValue} from 'jotai';
@@ -39,18 +39,33 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const [zoomLevel, setZoomLevel] = useAtom(zoomLevelAtom);
 
   // 인포윈도우 내 닫기 버튼 클릭 시 인포윈도우 닫히는 이벤트
-  const closeInfoWindow = (activeMarker: KakaoMarker, customOverlay: KakaoCustomOverlay) => {
+  const addEvListenerOnCustomOverlay = async (
+    activeMarker: KakaoMarker,
+    customOverlay: KakaoCustomOverlay,
+    restaurant: RestaurantInfo,
+  ) => {
     const closeButton = document.querySelector('[alt="close"]');
+    const overlayWrapper = document.querySelector('[id="restaurant-overlay"]');
+
     if (closeButton) {
       closeButton.addEventListener('click', () => {
         activeMarker.setMap(null);
         customOverlay.setMap(null);
       });
     }
+
+    if (overlayWrapper) {
+      overlayWrapper.addEventListener('click', async event => {
+        event.stopPropagation();
+
+        const data = await getDongName(restaurant.longitude, restaurant.latitude);
+        navigateToRestaurant(restaurant.title, data);
+      });
+    }
   };
 
   // 식당 마커 클릭 시 오픈되며, 인포윈도우를 표시하는 클로저를 만드는 함수입니다
-  const clickListener = (map: KakaoMap, customOverlay: KakaoCustomOverlay, restaurant: RestaurantInfo) => {
+  const markerClickCallback = (map: KakaoMap, customOverlay: KakaoCustomOverlay, restaurant: RestaurantInfo) => {
     return () => {
       const {latitude, longitude, id} = restaurant;
       const store = getDefaultStore();
@@ -73,12 +88,13 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         store.set(clickedRestaurantAtom, {activeRestaurantId: id});
 
         // add eventListener On close button
-        closeInfoWindow(activeMarker, customOverlay);
+        addEvListenerOnCustomOverlay(activeMarker, customOverlay, restaurant);
         return;
       }
     };
   };
 
+  // map 중심 좌표가 변경된 경우, 새로운 식당 데이터를 가져올 수 있도록 trigger 합니다.
   const centerChangedHandler = (map: KakaoMap) => {
     const latLng = map.getCenter();
     setCoordinates({latitude: latLng.getLat(), longitude: latLng.getLng()});
@@ -146,7 +162,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       window.kakao.maps.event.addListener(
         restaurantMarkers[i],
         'click',
-        clickListener(map, customOverlay, restaurants?.[i]),
+        markerClickCallback(map, customOverlay, restaurants?.[i]),
       );
     }
   };
@@ -178,10 +194,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       setMapAtom(map);
       setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
     });
-    // script.onload = () => {
-    //   // Kakao Maps SDK 로드 후 초기화
-
-    // };
   };
 
   useEffect(() => {
@@ -196,8 +208,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     const getRestaurants = async () => {
       try {
         // const {longitude, latitude} = coordinates;
-        // const data = await getDongName(longitude, latitude);
-        // dongName = data;
 
         // const fetchRestaurants = await fetch(
         //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
@@ -232,7 +242,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     }
 
     document.head.appendChild(script);
-
     script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
 
     return () => {

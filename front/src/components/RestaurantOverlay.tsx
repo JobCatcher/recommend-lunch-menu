@@ -18,7 +18,7 @@ const RestaurantOverlay = ({restaurant, currentPosition}: RestaurantOverlayProps
     // 이를 해결하는 방법으로 emotion 스타일 태그를 수동으로 삽입하는 법이 있다.
     // emotion에서 렌더링한 스타일 태그를 Kakao Map DOM 컨텍스트로 강제로 전달하는 것인데, emotion/cache와 emotion/server/create-instance 등을 사용하여 작업하여야 한다.
     // 이 정도의 공수를 들여야 할 필요는 없기에, inline으로 간다!
-    <Wrapper>
+    <Wrapper id={'restaurant-overlay'}>
       <Image src={close} style={{position: 'absolute', width: '32px', right: '0', cursor: 'pointer'}} alt="close" />
       <Restaurant restaurant={restaurant} currentPosition={currentPosition} />
     </Wrapper>
