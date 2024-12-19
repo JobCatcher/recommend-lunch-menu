@@ -25,10 +25,10 @@ public class RestaurantService {
         for (Object[] result : results) {
             Restaurant restaurant = (Restaurant) result[0];
             Thumbnail thumbnail = (Thumbnail) result[1];
-            if (thumbnail != null) {
-                restaurant.addThumbnail(thumbnail);
-            }
             restaurantMap.putIfAbsent(restaurant.getId(), restaurant);
+            if (thumbnail != null) {
+                restaurantMap.get(restaurant.getId()).addThumbnail(thumbnail);
+            }
         }
 
         return restaurantMap.values().stream()
