@@ -26,7 +26,7 @@ public class RestaurantRepositoryImpl implements RestaurantRepositoryCustom {
                 .leftJoin(thumbnail)
                 .on(
                         thumbnail.recordId.eq(restaurant.id)
-                                .and(thumbnail.tableName.eq(TableName.valueOf("RESTAURANT")))
+                                .and(thumbnail.tableName.eq(TableName.RESTAURANT))
                 )
                 .where(restaurant.geoHash.in(geoHashs))
                 .orderBy(restaurant.id.asc(), thumbnail.id.asc())
