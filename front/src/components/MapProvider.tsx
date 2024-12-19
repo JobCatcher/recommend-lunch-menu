@@ -48,15 +48,16 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     const overlayWrapper = document.querySelector('[id="restaurant-overlay"]');
 
     if (closeButton) {
-      closeButton.addEventListener('click', () => {
+      closeButton.addEventListener('click', e => {
+        e.stopPropagation();
         activeMarker.setMap(null);
         customOverlay.setMap(null);
       });
     }
 
     if (overlayWrapper) {
-      overlayWrapper.addEventListener('click', async event => {
-        event.stopPropagation();
+      overlayWrapper.addEventListener('click', async e => {
+        e.stopPropagation();
 
         const data = await getDongName(restaurant.longitude, restaurant.latitude);
         navigateToRestaurant(restaurant.title, data);
