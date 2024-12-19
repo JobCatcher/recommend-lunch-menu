@@ -46,7 +46,10 @@ public class RestaurantService {
         return restaurantRepository.findRestaurantInRangeV2(geoHashs);
     }
 
-    public List<Restaurant> findAll() {
-        return restaurantRepository.findAll();
+    public List<RestaurantResponseDto> findAll() {
+        return restaurantRepository.findAll()
+                .stream()
+                .map(restaurant -> RestaurantResponseDto.from(restaurant, List.of()))
+                .toList();
     }
 }

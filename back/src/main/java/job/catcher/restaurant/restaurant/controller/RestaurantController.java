@@ -12,12 +12,20 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
 
-    @GetMapping("/search")
-    public ApiResponse<Object> searchRestaurant(
+    @GetMapping("/search/v1")
+    public ApiResponse<Object> searchRestaurantV1(
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude
     ) {
         return ApiResponse.success(restaurantService.searchRestaurantV1(latitude, longitude));
+    }
+
+    @GetMapping("/search/v2")
+    public ApiResponse<Object> searchRestaurantV2(
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude
+    ) {
+        return ApiResponse.success(restaurantService.searchRestaurantV2(latitude, longitude));
     }
 
     @GetMapping("/all")
