@@ -13,7 +13,7 @@ export const getNumbers = (text: unknown) => {
   return '';
 };
 
-export const navigateToRestaurant = async (storeName: string, dongName?: string) => {
+export const navigateToRestaurant = (storeName: string, dongName?: string) => {
   const name = dongName ? `${dongName} ${storeName}` : `수내역 ${storeName}`;
 
   // window.open(
