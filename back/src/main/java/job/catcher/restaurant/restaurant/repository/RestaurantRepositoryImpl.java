@@ -22,7 +22,7 @@ public class RestaurantRepositoryImpl implements RestaurantRepositoryCustom {
     @Override
     public List<RestaurantResponseDto> findRestaurantInRangeV2(List<String> geoHashs) {
         return jpaQueryFactory
-                .selectFrom(restaurant)
+                .from(restaurant)
                 .leftJoin(thumbnail)
                 .on(
                         thumbnail.recordId.eq(restaurant.id)
