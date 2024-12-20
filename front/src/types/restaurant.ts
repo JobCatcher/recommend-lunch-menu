@@ -13,5 +13,5 @@ export interface RestaurantInfo extends ReviewAndRating {
   reviewCount: number;
   rating: number;
   category: string;
-  thumbnails: string[];
+  thumbnails: {thumbnailId: number; url: string}[];
 }

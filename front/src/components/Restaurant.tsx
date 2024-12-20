@@ -29,10 +29,8 @@ const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
   return (
     <RestaurantContainer onClick={handleClickRestaurant}>
       <ImageContainer>
-        {thumbnails.map((image, idx) => {
-          return (
-            <img key={`${title}-${idx}`} src={image || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />
-          );
+        {thumbnails.map(({thumbnailId, url}) => {
+          return <img key={thumbnailId} src={url || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />;
         })}
       </ImageContainer>
       <InfoContainer>
