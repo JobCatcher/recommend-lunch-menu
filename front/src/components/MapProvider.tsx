@@ -19,6 +19,7 @@ declare global {
 const MapProvider = ({children}: {children: React.ReactNode}) => {
   let map: KakaoMap;
   let toBeMap: Array<[number, KakaoMarker]> = [];
+  let script: HTMLScriptElement;
 
   const [isLoading] = useState(false);
   const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
@@ -169,41 +170,45 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     }
   };
 
+  const initialize = (latitude: number, longitude: number, curLat: number, curLong: number) => {
+    const container = document.getElementById('map');
+    const options = {
+      center: new window.kakao.maps.LatLng(latitude, longitude),
+      level: zoomLevel, // 지도 확대 레벨
+    };
+
+    if (!container) return;
+    // 지도 생성
+    map = new window.kakao.maps.Map(container, options);
+
+    // 음식점 마커 생성 및 표시
+    setMarkers(map);
+
+    // 지도에 마커 추가 (옵션)
+    const currentPosition = new window.kakao.maps.LatLng(curLat, curLong);
+    const currentPositionMarker = new window.kakao.maps.Marker({
+      position: currentPosition,
+    });
+
+    window.kakao.maps.event.addListener(map, 'dragend', () => centerChangedHandler(map));
+    window.kakao.maps.event.addListener(map, 'zoom_changed', () => zoomChangedHandler(map));
+
+    currentPositionMarker.setMap(map);
+    setMapAtom(map);
+  };
+
   const onLoadKakaoMap = (latitude: number, longitude: number, curLat: number, curLong: number) => {
     window.kakao.maps.load(() => {
-      const container = document.getElementById('map');
-      const options = {
-        center: new window.kakao.maps.LatLng(latitude, longitude),
-        level: zoomLevel, // 지도 확대 레벨
-      };
-
-      // 지도 생성
-      map = new window.kakao.maps.Map(container, options);
-
-      // 음식점 마커 생성 및 표시
-      setMarkers(map);
-
-      // 지도에 마커 추가 (옵션)
-      const currentPosition = new window.kakao.maps.LatLng(curLat, curLong);
-      const currentPositionMarker = new window.kakao.maps.Marker({
-        position: currentPosition,
-      });
-
-      window.kakao.maps.event.addListener(map, 'dragend', () => centerChangedHandler(map));
-      window.kakao.maps.event.addListener(map, 'zoom_changed', () => zoomChangedHandler(map));
-
-      currentPositionMarker.setMap(map);
-      setMapAtom(map);
+      initialize(latitude, longitude, curLat, curLong);
     });
   };
 
   useEffect(() => {
-    const script = document.createElement('script');
+    script = document.createElement('script');
     script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false&libraries=clusterer`;
     script.defer = true;
 
     const {latitude, longitude} = coordinates;
-    const {latitude: curLat, longitude: curLong} = currentPosition;
     console.log('위도&경도: ', latitude, longitude);
 
     if (!latitude && !longitude) {
@@ -215,15 +220,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
       setCoordinates({latitude, longitude});
       setCurrentPosition({latitude, longitude});
     });
-
-    document.head.appendChild(script);
-    script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
-
-    return () => {
-      // 컴포넌트 언마운트 시 스크립트 및 listener 제거
-      document.head.removeChild(script);
-      script.removeEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
-    };
   }, []);
 
   useEffect(() => {
@@ -251,8 +247,17 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   }, [coordinates]);
 
   useEffect(() => {
-    setMarkers(map);
-    setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
+    const {latitude, longitude} = coordinates;
+    const {latitude: curLat, longitude: curLong} = currentPosition;
+
+    document.head.appendChild(script);
+    script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
+
+    return () => {
+      // 컴포넌트 언마운트 시 스크립트 및 listener 제거
+      document.head.removeChild(script);
+      script.removeEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
+    };
   }, [zoomLevel, coordinates, restaurants, mapKey]);
 
   return <>{isLoading ? <>loading...</> : children}</>;
