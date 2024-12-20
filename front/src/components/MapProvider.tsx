@@ -102,9 +102,9 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const zoomChangedHandler = (map: KakaoMap) => {
     // 지도의 현재 레벨을 얻어옵니다
     const level = map.getLevel();
-    const {getLat, getLng} = map.getCenter();
+    const center = map.getCenter();
 
-    setCoordinates({latitude: getLat(), longitude: getLng()});
+    setCoordinates({latitude: center?.getLat(), longitude: center?.getLng()});
     setZoomLevel(level);
   };
 
