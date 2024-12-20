@@ -8,6 +8,7 @@ import {getDefaultStore, useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {customOverayAtom, mapAtom, markerAtom, zoomLevelAtom} from '../stores/mapAtom';
 import RestaurantOverlay from './RestaurantOverlay';
+import {fetchHelper} from '../apis/api';
 
 declare global {
   interface Window {
@@ -205,19 +206,19 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   useEffect(() => {
     const getRestaurants = async () => {
       try {
-        // const {longitude, latitude} = coordinates;
-
-        // const fetchRestaurants = await fetch(
-        //   `http://192.168.166.48:8080/restaurants/search?latitude=${latitude}&longitude=${longitude}`,
-        //   // `http://192.168.166.48:8080/restaurants/all`,
-        // ).then(res => res.json());
+        const {longitude, latitude} = coordinates;
+        const fetchRestaurants = (await fetchHelper<RestaurantInfo[]>(
+          `http://192.168.166.48:8080/restaurants/search/v1?latitude=${latitude}&longitude=${longitude}`,
+          // `http://192.168.166.48:8080/restaurants/all`,
+        )) as RestaurantInfo[];
 
         // console.log('음식점 data: ', fetchRestaurants);
 
-        setRestaurants(Data.meal);
-        setRestaurantsAtom({restaurants: Data.meal});
-        // setRestaurants(fetchRestaurants);
-        // setRestaurantsAtom({restaurants: fetchRestaurants});
+        // setRestaurants(Data.meal);
+        // setRestaurantsAtom({restaurants: Data.meal});
+
+        setRestaurants(fetchRestaurants);
+        setRestaurantsAtom({restaurants: fetchRestaurants});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
       } finally {
@@ -243,8 +244,9 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
     script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
 
     return () => {
-      // 컴포넌트 언마운트 시 스크립트 제거
+      // 컴포넌트 언마운트 시 스크립트 및 listener 제거
       document.head.removeChild(script);
+      script.removeEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
     };
   }, [zoomLevel, coordinates, restaurants, mapKey]);
 
