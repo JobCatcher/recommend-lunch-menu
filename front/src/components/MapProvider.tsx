@@ -194,25 +194,45 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
 
       currentPositionMarker.setMap(map);
       setMapAtom(map);
-      setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
     });
   };
 
   useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false&libraries=clusterer`;
+    script.defer = true;
+
+    const {latitude, longitude} = coordinates;
+    const {latitude: curLat, longitude: curLong} = currentPosition;
+    console.log('위도&경도: ', latitude, longitude);
+
+    if (!latitude && !longitude) {
+      throw new Error('위치 정보를 받아오지 못하였습니다.');
+    }
+
     navigator.geolocation.getCurrentPosition(async position => {
       const {latitude, longitude} = position.coords;
       setCoordinates({latitude, longitude});
       setCurrentPosition({latitude, longitude});
     });
+
+    document.head.appendChild(script);
+    script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
+
+    return () => {
+      // 컴포넌트 언마운트 시 스크립트 및 listener 제거
+      document.head.removeChild(script);
+      script.removeEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
+    };
   }, []);
 
   useEffect(() => {
     const getRestaurants = async () => {
       try {
-        const {longitude, latitude} = coordinates;
+        // const {longitude, latitude} = coordinates;
         const fetchRestaurants = (await fetchHelper<RestaurantInfo[]>(
-          `http://192.168.166.48:8080/restaurants/search/v1?latitude=${latitude}&longitude=${longitude}`,
-          // `http://192.168.166.48:8080/restaurants/all`,
+          // `http://192.168.166.48:8080/restaurants/search/v1?latitude=${latitude}&longitude=${longitude}`,
+          `http://192.168.166.48:8080/restaurants/all`,
         )) as RestaurantInfo[];
 
         // console.log('음식점 data: ', fetchRestaurants);
@@ -231,26 +251,8 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   }, [coordinates]);
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&autoload=false&libraries=clusterer`;
-    script.defer = true;
-
-    const {latitude, longitude} = coordinates;
-    const {latitude: curLat, longitude: curLong} = currentPosition;
-    console.log('위도&경도: ', latitude, longitude);
-
-    if (!latitude && !longitude) {
-      throw new Error('위치 정보를 받아오지 못하였습니다.');
-    }
-
-    document.head.appendChild(script);
-    script.addEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
-
-    return () => {
-      // 컴포넌트 언마운트 시 스크립트 및 listener 제거
-      document.head.removeChild(script);
-      script.removeEventListener('load', () => onLoadKakaoMap(latitude, longitude, curLat, curLong));
-    };
+    setMarkers(map);
+    setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
   }, [zoomLevel, coordinates, restaurants, mapKey]);
 
   return <>{isLoading ? <>loading...</> : children}</>;
