@@ -28,6 +28,14 @@ public class RestaurantController {
         return ApiResponse.success(restaurantService.searchRestaurantV2(latitude, longitude));
     }
 
+    @GetMapping("/search/v3")
+    public ApiResponse<Object> searchRestaurantV3(
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude
+    ) {
+        return ApiResponse.success(restaurantService.searchRestaurantV3(latitude, longitude));
+    }
+
     @GetMapping("/all")
     public ApiResponse<Object> allSearchRestaurant() {
         return ApiResponse.success(restaurantService.findAll());

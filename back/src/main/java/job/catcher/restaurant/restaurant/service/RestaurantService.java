@@ -4,6 +4,7 @@ import job.catcher.restaurant.global.util.GeoHashUtil;
 import job.catcher.restaurant.restaurant.domain.Restaurant;
 import job.catcher.restaurant.restaurant.dto.RestaurantResponseDto;
 import job.catcher.restaurant.restaurant.repository.RestaurantRepository;
+import job.catcher.restaurant.restaurant.repository.RestaurantRepositoryJooq;
 import job.catcher.restaurant.thumbnail.domain.Thumbnail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    private final RestaurantRepositoryJooq restaurantRepositoryJooq;
 
     public List<RestaurantResponseDto> searchRestaurantV1(double latitude, double longitude) {
         List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
@@ -44,6 +46,11 @@ public class RestaurantService {
     public List<RestaurantResponseDto> searchRestaurantV2(double latitude, double longitude) {
         List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
         return restaurantRepository.findRestaurantInRangeV2(geoHashs);
+    }
+
+    public List<RestaurantResponseDto> searchRestaurantV3(double latitude, double longitude) {
+        List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
+        return restaurantRepositoryJooq.findRestaurantInRangeV3(geoHashs);
     }
 
     public List<RestaurantResponseDto> findAll() {
