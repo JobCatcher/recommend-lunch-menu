@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.5'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'nu.studer.jooq' version '9.0'
 }
 
 group = 'job.catcher'
@@ -33,11 +34,81 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+
+	implementation 'org.springframework.boot:spring-boot-starter-jooq'
+	implementation 'org.jooq:jooq'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	jooqGenerator 'org.jooq:jooq-codegen'
+	jooqGenerator 'com.mysql:mysql-connector-j'
+
 	implementation 'ch.hsr:geohash:1.4.0'
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+	implementation 'javax.xml.bind:jaxb-api:2.3.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+//Querydsl 설정
+def generated = 'src/main/generated'
+
+//querydsl QClass 파일 생성 위치를 지정
+tasks.withType(JavaCompile).configureEach {
+	options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
+
+//java source set 에 querydsl QClass 위치 추가
+sourceSets {
+	main.java.srcDirs += [ generated ]
+}
+
+//자동 생성된 Q클래스 gradle clean으로 제거
+clean {
+	delete file(generated)
+}
+
+//jOOQ 설정
+jooq {
+	version = '3.19.15' // jooq 버전 확인 필요
+	edition = nu.studer.gradle.jooq.JooqEdition.OSS
+
+	configurations {
+		main { // main에 설정
+			generationTool {
+				jdbc {
+					driver = 'com.mysql.cj.jdbc.Driver'
+					url = 'jdbc:mysql://localhost:3303/jobcatcherdb'
+					user = 'jobcatcher'
+					password = 'jobcatcher1!'
+				}
+				generator {
+					name = 'org.jooq.codegen.DefaultGenerator'
+					database {
+						name = 'org.jooq.meta.mysql.MySQLDatabase'
+						includes = '.*' // 생성할 테이블 필터 (모든 테이블 포함)
+						excludes = '' // 제외할 테이블 필터
+						forcedTypes {
+							forcedType {
+								name = 'ENUM' // Jooq에서 Enum 타입으로 변환
+								expression = 'TABLE_NAME' // 컬럼 이름
+								types = 'VARCHAR|CHAR' // 컬럼의 데이터 타입
+							}
+						}
+					}
+					target {
+						packageName = 'job.catcher.restaurant' // 생성된 클래스의 패키지
+						directory = 'src/main/generated/jooq' // 생성 파일 경로
+					}
+				}
+			}
+		}
+	}
 }

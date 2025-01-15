@@ -1,14 +1,9 @@
 package job.catcher.restaurant.restaurant.controller;
 
-import job.catcher.restaurant.global.util.GeoHashUtil;
-import job.catcher.restaurant.restaurant.domain.Restaurant;
-import job.catcher.restaurant.restaurant.repository.RestaurantRepository;
+import job.catcher.restaurant.global.response.ApiResponse;
 import job.catcher.restaurant.restaurant.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,41 +12,32 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
 
-    private final RestaurantRepository restaurantRepository;
-
-    @CrossOrigin(origins = "http://localhost:5173")
-    @GetMapping("/search")
-    public List<Restaurant> searchRestaurant(
+    @GetMapping("/search/v1")
+    public ApiResponse<Object> searchRestaurantV1(
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude
     ) {
-        return restaurantService.searchRestaurant(latitude, longitude);
+        return ApiResponse.success(restaurantService.searchRestaurantV1(latitude, longitude));
     }
 
-    @GetMapping
-    public String getRestaurant(
-            @RequestParam("latitude") Double latitude,
-            @RequestParam("longitude") Double longitude,
-            @RequestParam("precision") Integer precision
-    ) {
-        return GeoHashUtil.encode(latitude, longitude, precision);
-    }
-
-    @GetMapping("/test")
-    public List<String> getRestaurantTest(
+    @GetMapping("/search/v2")
+    public ApiResponse<Object> searchRestaurantV2(
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude
     ) {
-        return GeoHashUtil.getNeighbors(latitude, longitude, 6);
+        return ApiResponse.success(restaurantService.searchRestaurantV2(latitude, longitude));
     }
 
-    @Transactional
-    @PutMapping("/update")
-    public void updateRestaurant() {
-        List<Restaurant> all = restaurantRepository.findAll();
-        for (Restaurant r: all) {
-            String geoHash = GeoHashUtil.encode(r.getLatitude(), r.getLongitude(), 6);
-            r.updateGeoHash(geoHash);
-        }
+    @GetMapping("/search/v3")
+    public ApiResponse<Object> searchRestaurantV3(
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude
+    ) {
+        return ApiResponse.success(restaurantService.searchRestaurantV3(latitude, longitude));
+    }
+
+    @GetMapping("/all")
+    public ApiResponse<Object> allSearchRestaurant() {
+        return ApiResponse.success(restaurantService.findAll());
     }
 }

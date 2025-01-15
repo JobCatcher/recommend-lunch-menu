@@ -23,23 +23,20 @@ public class Thumbnail {
     @Column(name = "original_name", nullable = false)
     private String originalName;
 
-    @Column(name = "path", length = 50, nullable = false)
-    private String path;
-
     @Column(name = "url", nullable = false)
     private String url;
 
+    @Enumerated(value = EnumType.STRING)
     @Column(name = "table_name", nullable = false)
-    private String tableName;
+    private TableName tableName;
 
     @Column(name = "record_id", nullable = false)
     private Long recordId;
 
     @Builder
-    public Thumbnail(String name, String originalName, String path, String url, String tableName, Long recordId) {
+    public Thumbnail(String name, String originalName, String url, TableName tableName, Long recordId) {
         this.name = name;
         this.originalName = originalName;
-        this.path = path;
         this.url = url;
         this.tableName = tableName;
         this.recordId = recordId;

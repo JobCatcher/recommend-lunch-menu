@@ -3,7 +3,12 @@ import {RestaurantInfo} from '../types/restaurant';
 import Restaurant from './Restaurant';
 import close from '../../public/close.png';
 
-const RestaurantOverlay = ({restaurant}: {restaurant: RestaurantInfo}) => {
+interface RestaurantOverlayProps {
+  restaurant: RestaurantInfo;
+  currentPosition: {latitude: number; longitude: number};
+}
+
+const RestaurantOverlay = ({restaurant, currentPosition}: RestaurantOverlayProps) => {
   return (
     // RestaurantOverlay 컴포넌트는 KakaoMap 내 RenderToString 함수를 통해 문자열로 변환되는데,
     // 이 때 스타일이 적용되지 않는 문제가 발생합니다.
@@ -13,9 +18,9 @@ const RestaurantOverlay = ({restaurant}: {restaurant: RestaurantInfo}) => {
     // 이를 해결하는 방법으로 emotion 스타일 태그를 수동으로 삽입하는 법이 있다.
     // emotion에서 렌더링한 스타일 태그를 Kakao Map DOM 컨텍스트로 강제로 전달하는 것인데, emotion/cache와 emotion/server/create-instance 등을 사용하여 작업하여야 한다.
     // 이 정도의 공수를 들여야 할 필요는 없기에, inline으로 간다!
-    <Wrapper>
+    <Wrapper id={'restaurant-overlay'}>
       <Image src={close} style={{position: 'absolute', width: '32px', right: '0', cursor: 'pointer'}} alt="close" />
-      <Restaurant {...restaurant} />
+      <Restaurant restaurant={restaurant} currentPosition={currentPosition} />
     </Wrapper>
   );
 };
