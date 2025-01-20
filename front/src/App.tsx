@@ -1,18 +1,26 @@
-import "./App.css";
-import "./reset.css";
-import LunchMenu from "./components/LunchMenu";
-import Map from "./components/Map";
-import styled from "@emotion/styled";
+import './App.css';
+import './reset.css';
+import LunchMenu from './components/LunchMenu';
+import styled from '@emotion/styled';
+import MapProvider from './components/MapProvider';
+import {isMobile} from './utils/utils';
 
 function App() {
+  const mobile = isMobile();
+
+  let width = mobile ? '300px' : '700px';
+  let height = mobile ? '400px' : '800px';
+
   return (
-    <HomeContainer>
-      <MainTitle>오늘의 점심</MainTitle>
-      <Flex>
-        <Map />
-        <LunchMenu />
-      </Flex>
-    </HomeContainer>
+    <MapProvider>
+      <HomeContainer>
+        <MainTitle>오늘의 점심</MainTitle>
+        <Flex>
+          <div id="map" style={{width, height}}></div>
+          <LunchMenu />
+        </Flex>
+      </HomeContainer>
+    </MapProvider>
   );
 }
 

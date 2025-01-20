@@ -1,23 +1,29 @@
-import { useState } from "react";
-import data from "../../data/data.json";
-import styled from "@emotion/styled";
+import styled from '@emotion/styled';
 
-import Restaurant from "./Restaurant";
-import { RestaurantInfo } from "../types/restaurant";
+import Restaurant from './Restaurant';
+import {useAtomValue} from 'jotai';
+import {restaurantsAtom} from '../stores/restaurantAtom';
 
 const LunchMenu = () => {
-  const [restaurants] = useState<RestaurantInfo[]>(data);
+  const {restaurants} = useAtomValue(restaurantsAtom);
+
+  const getContents = () => {
+    if (!restaurants.length) {
+      return <li>추천메뉴가 없습니다..🥲</li>;
+    }
+    return (
+      <>
+        {restaurants.map((restaurant, idx) => {
+          return <Restaurant key={`${restaurant.title}-${idx}`} restaurant={restaurant} />;
+        })}
+      </>
+    );
+  };
 
   return (
     <LunchMenuContainer>
       <StyledText>추천 메뉴</StyledText>
-      <LunchMenuWrapper>
-        {restaurants.map((restaurant, idx) => {
-          return (
-            <Restaurant key={`${restaurant.title}-${idx}`} {...restaurant} />
-          );
-        })}
-      </LunchMenuWrapper>
+      <LunchMenuWrapper noContents={!restaurants.length}>{getContents()}</LunchMenuWrapper>
     </LunchMenuContainer>
   );
 };
@@ -38,7 +44,7 @@ const StyledText = styled.h2`
   margin: 16px 0;
 `;
 
-const LunchMenuWrapper = styled.ul`
+const LunchMenuWrapper = styled.ul<{noContents: boolean}>`
   padding: 0 20px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -47,4 +53,5 @@ const LunchMenuWrapper = styled.ul`
   @media screen and (max-width: 1400px) {
     grid-template-columns: repeat(1, 1fr);
   }
+  ${({noContents}) => (noContents ? `display: flex; min-width: 500px; justify-content: center;` : '')}
 `;
