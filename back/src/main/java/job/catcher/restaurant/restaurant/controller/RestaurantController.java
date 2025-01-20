@@ -40,4 +40,10 @@ public class RestaurantController {
     public ApiResponse<Object> allSearchRestaurant() {
         return ApiResponse.success(restaurantService.findAll());
     }
+
+    @PutMapping("/geo_hash")
+    public ApiResponse<Object> updateGeoHash() {
+        restaurantService.updateGeoHash();
+        return ApiResponse.EMPTY;
+    }
 }

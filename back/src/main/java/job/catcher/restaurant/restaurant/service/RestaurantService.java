@@ -8,6 +8,7 @@ import job.catcher.restaurant.restaurant.repository.RestaurantRepositoryJooq;
 import job.catcher.restaurant.thumbnail.domain.Thumbnail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,5 +59,14 @@ public class RestaurantService {
                 .stream()
                 .map(restaurant -> RestaurantResponseDto.from(restaurant, List.of()))
                 .toList();
+    }
+
+    @Transactional
+    public void updateGeoHash() {
+        List<Restaurant> restaurants = restaurantRepository.findAll();
+        for (Restaurant restaurant: restaurants) {
+            String geoHash = GeoHashUtil.encode(restaurant.getLatitude(), restaurant.getLongitude(), 6);
+            restaurant.updateGeoHash(geoHash);
+        }
     }
 }
