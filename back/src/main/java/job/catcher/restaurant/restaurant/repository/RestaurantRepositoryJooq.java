@@ -1,27 +1,16 @@
 package job.catcher.restaurant.restaurant.repository;
 
-import job.catcher.restaurant.jobcatcherdb.enums.ThumbnailTableName;
 import job.catcher.restaurant.restaurant.domain.Restaurant;
 import job.catcher.restaurant.restaurant.dto.RestaurantResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
-
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.impl.DSL;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.jooq.impl.DSL.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static job.catcher.restaurant.jobcatcherdb.tables.Restaurant.RESTAURANT;
-import static job.catcher.restaurant.jobcatcherdb.tables.Thumbnail.THUMBNAIL;
 
 @Repository
 @RequiredArgsConstructor
