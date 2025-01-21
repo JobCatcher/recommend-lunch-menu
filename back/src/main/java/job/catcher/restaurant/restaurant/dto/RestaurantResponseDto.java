@@ -5,6 +5,7 @@ import job.catcher.restaurant.restaurant.domain.Restaurant;
 import job.catcher.restaurant.thumbnail.domain.Thumbnail;
 import lombok.Builder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Builder
@@ -26,7 +27,7 @@ public record RestaurantResponseDto(
         this.longitude = longitude;
         this.rating = rating;
         this.reviewCount = reviewCount;
-        this.thumbnails = thumbnails;
+        this.thumbnails = (thumbnails.size() == 1 && thumbnails.get(0).thumbnailId == 0L) ? new ArrayList<>() : thumbnails;
     }
 
     public static RestaurantResponseDto from(Restaurant restaurant, List<ThumbnailResponseDto> thumbnails) {
