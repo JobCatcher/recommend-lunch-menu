@@ -29,7 +29,10 @@ jobs:
       # 4. gradle 설정 파일 저장
       - name: Save prod build.gradle
         run: |
-          echo "${{ secrets.BUILD_GRADLE }}" > back/build.gradle
+          cat <<EOF > back/build.gradle
+          ${{ secrets.BUILD_GRADLE }}
+          EOF
+
 
       # 5. Gradle 빌드
       - name: Build with Gradle
