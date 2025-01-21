@@ -4,7 +4,7 @@ import ReactDOMServer from 'react-dom/server';
 import {getDongName, navigateToRestaurant, setActiveMarker} from '../utils/utils';
 import {KakaoCustomOverlay, KakaoMap, KakaoMarker, KakaoNamespace} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
-import {getDefaultStore, useAtom, useAtomValue} from 'jotai';
+import {getDefaultStore, useAtom} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {customOverayAtom, mapAtom, markerAtom, zoomLevelAtom} from '../stores/mapAtom';
 import RestaurantOverlay from './RestaurantOverlay';
@@ -17,7 +17,7 @@ declare global {
 
 const MapProvider = ({children}: {children: React.ReactNode}) => {
   let map: KakaoMap;
-  let toBeMap: Array<[number, KakaoMarker]> = [];
+  const toBeMap: Array<[number, KakaoMarker]> = [];
 
   const [isLoading] = useState(false);
   const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
@@ -34,8 +34,7 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
-  const [{markers}, setRestaurantMarkersAtom] = useAtom(restaurantMarkersAtom);
-  const {activeRestaurantId} = useAtomValue(clickedRestaurantAtom);
+  const [, setRestaurantMarkersAtom] = useAtom(restaurantMarkersAtom);
   const [zoomLevel, setZoomLevel] = useAtom(zoomLevelAtom);
 
   // 인포윈도우 내 닫기 버튼 클릭 시 인포윈도우 닫히는 이벤트
@@ -220,7 +219,6 @@ const MapProvider = ({children}: {children: React.ReactNode}) => {
         // setRestaurantsAtom({restaurants: fetchRestaurants});
       } catch (error) {
         console.error('Error On KAKAO API(GET Dong Name):', error);
-      } finally {
       }
     };
     getRestaurants();
