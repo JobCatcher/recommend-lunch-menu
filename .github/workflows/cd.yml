@@ -28,9 +28,10 @@ jobs:
 
       # 4. gradle 설정 파일 저장
       - name: Save prod build.gradle
+        env:
+          BUILD_GRADLE_CONTENT: ${{ secrets.BUILD_GRADLE }}
         run: |
-          printf "%s" "${{ secrets.BUILD_GRADLE }}" > back/build.gradle
-
+          echo "$BUILD_GRADLE_CONTENT" > back/build.gradle
 
       # 5. Gradle 빌드
       - name: Build with Gradle
