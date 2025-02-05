@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, current_app
 from flask_cors import CORS
 import requests
 from bs4 import BeautifulSoup
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "http://localhost:8080"]}})
 
 # 크롤링 함수: 필요한 URL에서 데이터를 추출
 def scrape_data(url):
@@ -42,6 +42,13 @@ def scrape_data(url):
         '블로그리뷰': blog_review_count
     }
 
+    
+def get_restaurants_data(latitude, longitude):
+    # Todo
+    # 위도, 경도 기반으로 음식점 목록 API 호출
+    data = {"message": "Hello, World!"}
+    return data
+
 # API 엔드포인트
 @app.route('/', methods=['GET'])
 def hello_world():
@@ -52,6 +59,18 @@ def get_scraped_data():
     query = request.args.get('query')
     url = 'https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query='+query+'' # 크롤링할 URL
     data = scrape_data(url)
+    return jsonify(data)
+
+@app.route('/api/restaurants', methods=['GET'])
+def get_restaurants():
+    # current_app.logger.info("[DEBUG]")
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+    print("----------")
+    print('latitude:', latitude)
+    print('longitude:', longitude)
+    print("----------")
+    data = get_restaurants_data(latitude, longitude)
     return jsonify(data)
 
 if __name__ == '__main__':
