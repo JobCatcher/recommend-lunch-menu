@@ -4,39 +4,44 @@ import {getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
+import NoImage from '../../public/no-thumbnail.jpg';
 
 interface RestaurantProps {
   restaurant: RestaurantInfo;
   currentPosition?: {latitude: number; longitude: number};
 }
 
-const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
-  if (!restaurant) return;
-
-  const {id, title, category, reviewCount, rating, thumbnails, latitude, longitude} = restaurant;
+const Restaurant = ({
+  restaurant: {restaurantId, title, category, reviewCount, rating, thumbnails, latitude, longitude},
+  currentPosition,
+}: RestaurantProps) => {
   const map = useAtomValue(mapAtom);
   const {markers} = useAtomValue(restaurantMarkersAtom);
   const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
 
   const handleClickRestaurant = () => {
-    const mapMarker = markers.get(id);
+    const mapMarker = markers.get(restaurantId);
+    const latlng = new window.kakao.maps.LatLng(latitude, longitude);
     triggerEvent('click', mapMarker); // 인포윈도우 띄우기
 
-    setActiveRestaurant({activeRestaurantId: id});
-    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
+    setActiveRestaurant({activeRestaurantId: restaurantId});
+    map!.panTo(latlng);
+    map?.setLevel(4, {anchor: latlng});
   };
 
   return (
     <RestaurantContainer onClick={handleClickRestaurant}>
       <ImageContainer>
-        {thumbnails.map((image, idx) => {
-          return (
-            <img key={`${title}-${idx}`} src={image || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />
-          );
-        })}
+        {thumbnails.length ? (
+          thumbnails.map(({url, thumbnailId}) => {
+            return <img key={`${title}-${thumbnailId}`} src={url || NoImage} alt={`${title} 이미지`} />;
+          })
+        ) : (
+          <img src={NoImage} alt={`${title} 이미지`} />
+        )}
       </ImageContainer>
       <InfoContainer>
-        <Title>{title} </Title>
+        `<Title>{title} </Title>
         <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
         <Review>
