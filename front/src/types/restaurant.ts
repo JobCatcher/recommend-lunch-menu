@@ -5,7 +5,7 @@ interface ReviewAndRating {
 }
 
 export interface RestaurantInfo extends ReviewAndRating {
-  id: number;
+  restaurantId: number;
   title: string;
   latitude: number;
   longitude: number;
@@ -13,5 +13,5 @@ export interface RestaurantInfo extends ReviewAndRating {
   reviewCount: number;
   rating: number;
   category: string;
-  thumbnails: string[];
+  thumbnails: {url: string; thumbnailId: number}[];
 }
