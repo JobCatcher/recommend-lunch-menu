@@ -12,7 +12,7 @@ def hello_world():
     return "Hello, World!"
 
 # Google Places API 설정
-GOOGLE_API_KEY = "AIzaSyDE-ZdPprjZKYmvEpw-UdktnU9WCBQxUbM" #"AIzaSyDE-ZdPprjZKYmvEpw-UdktnU9WCBQxUbM"
+GOOGLE_API_KEY = "API_KEY"
 GOOGLE_PLACES_URL = "https://places.googleapis.com/v1/places:searchNearby"
 HEADERS = {
     "X-Goog-Api-Key": GOOGLE_API_KEY,
