@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, current_app
+from flask import Flask, request, jsonify, Response, current_app
 from flask_cors import CORS
+import json
 import requests
 from bs4 import BeautifulSoup
 
@@ -73,5 +74,42 @@ def get_restaurants():
     data = get_restaurants_data(latitude, longitude)
     return jsonify(data)
 
+#구글 places API
+GOOGLE_API_KEY = "API_KEY"
+GOOGLE_PLACES_URL = "https://places.googleapis.com/v1/places:searchNearby"
+HEADERS = {
+    "X-Goog-Api-Key": GOOGLE_API_KEY,
+    "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.location",
+    "Accept-Language": "ko"
+}
+
+@app.route("/api/restaurants/search", methods=["GET"])
+def get_nearby_restaurants():
+    latitude = request.args.get("latitude", type=float)
+    longitude = request.args.get("longitude", type=float)
+    radius = request.args.get("radius", 500, type=float)  # 기본 반경 500m
+
+    if latitude is None or longitude is None:
+        return jsonify({"error": "latitude and longitude are required"}), 400
+
+    body = {
+        "includedTypes": ["restaurant"],
+        "maxResultCount": 10,
+        "locationRestriction": {
+            "circle": {
+                "center": {"latitude": latitude, "longitude": longitude},
+                "radius": radius
+            }
+        }
+    }
+
+    response = requests.post(GOOGLE_PLACES_URL, json=body, headers=HEADERS)
+    
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to fetch data", "details": response.text}), response.status_code
+
+    # return jsonify(response.json())
+    return Response(json.dumps(response.json(), ensure_ascii=False), content_type="application/json; charset=utf-8")
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
