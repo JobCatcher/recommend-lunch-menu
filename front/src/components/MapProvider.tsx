@@ -8,12 +8,15 @@ import {restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
 import RestaurantOverlay from './RestaurantOverlay';
 import {addClusterer, centerChangedHandler, markerClickCallback, zoomChangedHandler} from '../services/kakaoMap';
+import styled from '@emotion/styled';
 
 declare global {
   interface Window {
     kakao: KakaoNamespace;
   }
 }
+
+const DEFAULT_ZOOM_LEVEL = 3;
 
 const MapProvider = ({children}: {children: React.ReactElement}) => {
   // let map: KakaoMap;
@@ -36,7 +39,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
     longitude: 0,
   });
 
-  const [zoomLevel, setZoomLevel] = useState(3);
+  const [zoomLevel, setZoomLevel] = useState(DEFAULT_ZOOM_LEVEL);
 
   const mapKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
   const script = document.createElement('script');
@@ -48,9 +51,9 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
   const [restaurantMarkersMap, setRestaurantMarkersAtom] = useAtom(restaurantMarkersAtom);
   // const [zoomLevel, setZoomLevel] = useAtom(zoomLevelAtom);
 
-  // const addClcu
-
   const addRestaurantMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
+    console.log('============== addMarker ==============');
+
     const restaurantMarkers: KakaoMarker[] = new Array(restaurants.length);
     const restaurantMarkerImage = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png';
 
@@ -100,14 +103,19 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
   };
 
   const setMarkers = (map: KakaoMap) => {
-    if (zoomLevel > 5) {
+    console.log('setMarkers');
+
+    if (zoomLevel > 5 && restaurants.length) {
+      console.log('addClusterer');
+
       // 마커 클러스터러를 생성합니다
       const clusterer = addClusterer(map, restaurants);
 
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
         // 현재 지도 레벨에서 1레벨 확대한 레벨
         const level = map.getLevel() - 1;
-        console.log('ff: ', cluster.getCenter());
+
+        console.log('cluster ff: ', cluster.getCenter());
 
         // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
         map.setLevel(level, {anchor: cluster.getCenter()});
@@ -166,15 +174,15 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         // setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
 
         window.kakao.maps.event.addListener(mapRef.current, 'dragend', () =>
-          centerChangedHandler(mapRef.current!, setDraggedPosition),
+          centerChangedHandler(mapRef.current!, restaurants, setDraggedPosition),
         );
         window.kakao.maps.event.addListener(mapRef.current, 'zoom_changed', () =>
           zoomChangedHandler(mapRef.current!, setZoomLevel),
         );
       });
     },
-    [],
-    // [draggedPosition],
+    // [],
+    [draggedPosition],
   );
 
   const getRestaurants = useCallback(
@@ -200,7 +208,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         // return [];
         const {markers} = restaurantMarkersMap;
         if (markers.size && !data.length) {
-          console.log('remove');
+          console.log('remove: ', markers.get(1));
 
           for (const key of Object.keys(markers)) {
             markers.get(parseInt(key))?.setMap(null);
@@ -266,7 +274,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       const {latitude, longitude} = draggedPosition;
 
       // 최초에는 위,경도가 0으로 이 경우에는 호출 x
-      if (!latitude && !longitude) return;
+      if (!latitude && !longitude && zoomLevel === DEFAULT_ZOOM_LEVEL) return;
 
       console.log('여긴 나옴');
 
@@ -274,30 +282,31 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         setRestaurants(res);
         setRestaurantsAtom({restaurants: res});
         // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
+
         if (mapRef.current) setMarkers(mapRef.current);
       });
     })();
   }, [draggedPosition, zoomLevel]);
 
-  useEffect(() => {
-    console.log('zzzzz cha');
+  // useEffect(() => {
+  //   console.log('zzzzz cha');
 
-    (async () => {
-      const {latitude, longitude} = draggedPosition;
+  //   (async () => {
+  //     const {latitude, longitude} = draggedPosition;
 
-      // 최초에는 위,경도가 0으로 이 경우에는 호출 x
-      if (!latitude && !longitude) return;
+  //     // 최초에는 위,경도가 0으로 이 경우에는 호출 x
+  //     if (!latitude && !longitude) return;
 
-      console.log('여긴 나옴');
+  //     console.log('여긴 나옴');
 
-      await getRestaurants().then(res => {
-        setRestaurants(res);
-        setRestaurantsAtom({restaurants: res});
-        // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
-        if (mapRef.current) setMarkers(mapRef.current);
-      });
-    })();
-  }, [zoomLevel]);
+  //     await getRestaurants().then(res => {
+  //       setRestaurants(res);
+  //       setRestaurantsAtom({restaurants: res});
+  //       // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
+  //       if (mapRef.current) setMarkers(mapRef.current);
+  //     });
+  //   })();
+  // }, [zoomLevel]);
 
   // forwardRef
   const renderChildren = () => {
@@ -308,7 +317,12 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
     });
   };
 
-  return <>{isLoading ? <>loading...</> : <>{renderChildren()}</>}</>;
+  return <MapContainer>{isLoading ? <>loading...</> : <>{renderChildren()}</>}</MapContainer>;
 };
 
 export default MapProvider;
+
+const MapContainer = styled.div`
+  width: 100%;
+  padding: 0 20px;
+`;
