@@ -1,62 +1,62 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {navigateToRestaurant} from '../utils/utils';
+import {getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
-import {clickedRestaurantAtom} from '../stores/restaurantAtom';
-import {mapAtom, markerAtom} from '../stores/mapAtom';
+import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
+import {mapAtom} from '../stores/mapAtom';
+import NoImage from '../../public/no-thumbnail.jpg';
 
-const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latitude, longitude}: RestaurantInfo) => {
+interface RestaurantProps {
+  restaurant: RestaurantInfo;
+  currentPosition?: {latitude: number; longitude: number};
+}
+
+const Restaurant = ({
+  restaurant: {restaurantId, title, category, reviewCount, rating, thumbnails, latitude, longitude},
+  currentPosition,
+}: RestaurantProps) => {
   const map = useAtomValue(mapAtom);
-  const [activeRestaurant, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
-  const [activeMarkerAtom, setActiveMarkerAtom] = useAtom(markerAtom);
-
-  const setMaker = () => {
-    if (activeMarkerAtom) {
-      activeMarkerAtom.setMap(null);
-    }
-
-    const imageSrc = '/active.png';
-    const imageSize = new window.kakao.maps.Size(28, 38);
-    const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
-
-    let marker = new window.kakao.maps.Marker({
-      map: map!,
-      position: new window.kakao.maps.LatLng(latitude, longitude),
-      image: markerImage,
-    });
-
-    marker.setMap(map);
-    setActiveMarkerAtom(marker);
-  };
+  const {markers} = useAtomValue(restaurantMarkersAtom);
+  const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
 
   const handleClickRestaurant = () => {
-    const {activeRestaurantId} = activeRestaurant;
-    if (activeRestaurantId && activeRestaurantId === id) {
-      navigateToRestaurant(title);
+    const mapMarker = markers.get(restaurantId);
+    const latlng = new window.kakao.maps.LatLng(latitude, longitude);
+    triggerEvent('click', mapMarker); // 인포윈도우 띄우기
 
-      return;
-    }
-
-    setMaker();
-    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
-    setActiveRestaurant({activeRestaurantId: id});
+    setActiveRestaurant({activeRestaurantId: restaurantId});
+    map!.panTo(latlng);
+    map?.setLevel(4, {anchor: latlng});
   };
 
   return (
     <RestaurantContainer onClick={handleClickRestaurant}>
       <ImageContainer>
-        {thumbnails.map((image, idx) => {
-          return (
-            <img key={`${title}-${idx}`} src={image || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />
-          );
-        })}
+        {thumbnails.length ? (
+          thumbnails.map(({url, thumbnailId}) => {
+            return <img key={`${title}-${thumbnailId}`} src={url || NoImage} alt={`${title} 이미지`} />;
+          })
+        ) : (
+          <img src={NoImage} alt={`${title} 이미지`} />
+        )}
       </ImageContainer>
       <InfoContainer>
-        <Title>{title}</Title>
-        <Category>{category}</Category>
+        `<Title>{title} </Title>
+        <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
-        <Review>리뷰: {reviewCount}</Review>
-        <Rating>별점: {rating}</Rating>
+        <Review>
+          리뷰: {reviewCount} / 별점: {rating}
+        </Review>
+        <Rating>
+          {currentPosition ? (
+            <span>
+              거리:{' '}
+              {getDistanceFromLatLonInKm(latitude, longitude, currentPosition.latitude, currentPosition.longitude)}
+            </span>
+          ) : (
+            <></>
+          )}
+        </Rating>
       </InfoContainer>
     </RestaurantContainer>
   );
@@ -64,21 +64,24 @@ const Restaurant = ({id, title, category, reviewCount, rating, thumbnails, latit
 
 export default Restaurant;
 
+const Title = styled.h3`
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 0 5px;
+`;
+
 const RestaurantContainer = styled.li`
   max-width: 320px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  background-color: #fff;
+  background-color: #fafcff;
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
-  &:hover {
-    transform: translateY(-4px);
-  }
   cursor: pointer;
   overflow: hidden;
 `;
@@ -101,12 +104,6 @@ const InfoContainer = styled.div`
   margin-left: 15px;
   display: flex;
   flex-direction: column;
-`;
-
-const Title = styled.h3`
-  font-size: 18px;
-  font-weight: bold;
-  margin: 0 0 5px;
 `;
 
 const Category = styled.p`
