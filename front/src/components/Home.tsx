@@ -6,14 +6,14 @@ import React from 'react';
 const Home = React.forwardRef<HTMLDivElement>((_, mapRef) => {
   const mobile = isMobile();
 
-  const width = mobile ? '300px' : '700px';
+  const width = mobile ? '300px' : '1100px';
   const height = mobile ? '400px' : '800px';
 
   return (
     <HomeContainer>
       <MainTitle>오늘의 점심</MainTitle>
       <Flex>
-        <div id="map" ref={mapRef} style={{width, height}}></div>
+        <div id="map" ref={mapRef} style={{width, height}} />
         <LunchMenu />
       </Flex>
     </HomeContainer>
@@ -23,6 +23,7 @@ const Home = React.forwardRef<HTMLDivElement>((_, mapRef) => {
 export default Home;
 
 const HomeContainer = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,6 +39,7 @@ const MainTitle = styled.h1`
 `;
 
 const Flex = styled.div`
+  width: 100%;
   display: flex;
   @media (max-width: 1000px) {
     flex-direction: column;
