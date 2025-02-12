@@ -36,6 +36,7 @@ const LunchMenuContainer = styled.div`
   align-items: center;
   height: 800px;
   overflow: scroll;
+  padding: 0 12px;
 `;
 
 const StyledText = styled.h2`
