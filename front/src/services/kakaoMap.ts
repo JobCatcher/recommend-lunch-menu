@@ -8,9 +8,12 @@ import {clickedRestaurantAtom} from '../stores/restaurantAtom';
 // map 중심 좌표가 변경된 경우, 새로운 식당 데이터를 가져올 수 있도록 trigger 합니다.
 export const centerChangedHandler = (
   map: KakaoMap,
+  restaurants: RestaurantInfo[],
   setDraggedPosition: React.Dispatch<React.SetStateAction<Position>>,
 ) => {
   const latLng = map.getCenter();
+  console.log(restaurants);
+
   setDraggedPosition({latitude: latLng.getLat(), longitude: latLng.getLng()});
 };
 
@@ -78,7 +81,7 @@ export const markerClickCallback = (map: KakaoMap, customOverlay: KakaoCustomOve
 };
 
 export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
-  console.log('dddd');
+  console.log('add clusterer: ', map, restaurants);
 
   const clusterer = new window.kakao.maps.MarkerClusterer({
     map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
@@ -87,8 +90,6 @@ export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
     disableClickZoom: true,
   });
 
-  console.log('mmmm');
-
   const markers = restaurants.map(
     ({latitude, longitude}) =>
       new window.kakao.maps.Marker({
@@ -96,9 +97,8 @@ export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
       }),
   );
 
-  console.log('!!!!');
-
   clusterer.addMarkers(markers);
+  console.log('add clusterer finishied');
 
   return clusterer;
 };

@@ -37,7 +37,7 @@ const Restaurant = ({
             return <img key={`${title}-${thumbnailId}`} src={url || NoImage} alt={`${title} 이미지`} />;
           })
         ) : (
-          <img src={NoImage} alt={`${title} 이미지`} />
+          <EmptyImage src={NoImage} alt={`${title} 이미지`} />
         )}
       </ImageContainer>
       <InfoContainer>
@@ -71,7 +71,8 @@ const Title = styled.h3`
 `;
 
 const RestaurantContainer = styled.li`
-  max-width: 320px;
+  max-width: 230px;
+  width: 230px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -94,6 +95,7 @@ const ImageContainer = styled.div`
 
   img {
     width: 150px;
+    min-width: 150px;
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
@@ -122,4 +124,8 @@ const Rating = styled.p`
   font-size: 12px;
   color: #999;
   margin: 0;
+`;
+
+const EmptyImage = styled.img`
+  width: 100% !important;
 `;
