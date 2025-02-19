@@ -1,13 +1,11 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 // import Data from '../../data/data.json';
-import ReactDOMServer from 'react-dom/server';
-import {KakaoMap, KakaoMarker, KakaoNamespace, Position} from '../types/kakao';
+import {KakaoMap, KakaoNamespace, Position} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {useAtom} from 'jotai';
 import {restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
-import RestaurantOverlay from './RestaurantOverlay';
-import {addClusterer, centerChangedHandler, markerClickCallback, zoomChangedHandler} from '../services/kakaoMap';
+import {addClusterer, centerChangedHandler, zoomChangedHandler} from '../services/kakaoMap';
 import styled from '@emotion/styled';
 
 declare global {
@@ -20,7 +18,7 @@ const DEFAULT_ZOOM_LEVEL = 3;
 
 const MapProvider = ({children}: {children: React.ReactElement}) => {
   // let map: KakaoMap;
-  const toBeMap: Array<[number, KakaoMarker]> = [];
+  // const toBeMap: Array<[number, KakaoMarker]> = [];
 
   const mapRef = useRef<KakaoMap>();
   const [isLoading] = useState(false);
@@ -48,74 +46,64 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
 
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
-  const [restaurantMarkersMap, setRestaurantMarkersAtom] = useAtom(restaurantMarkersAtom);
+  const [restaurantMarkersMap] = useAtom(restaurantMarkersAtom);
   // const [zoomLevel, setZoomLevel] = useAtom(zoomLevelAtom);
 
-  const addRestaurantMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
-    console.log('============== addMarker ==============');
+  // const addRestaurantMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
+  //   console.log('============== addMarker ==============');
 
-    const restaurantMarkers: KakaoMarker[] = new Array(restaurants.length);
-    const restaurantMarkerImage = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png';
+  //   const restaurantMarkers: KakaoMarker[] = new Array(restaurants.length);
 
-    // if (!restaurants.length && res)
-    for (let i = 0; i < restaurants?.length; i++) {
-      const latlng = new window.kakao.maps.LatLng(restaurants?.[i].latitude, restaurants?.[i].longitude);
-      const imageSize = new window.kakao.maps.Size(24, 35);
+  //   // if (!restaurants.length && res)
+  //   for (let i = 0; i < restaurants?.length; i++) {
+  //     const latlng = new window.kakao.maps.LatLng(restaurants?.[i].latitude, restaurants?.[i].longitude);
+  //     // const imageSize = new window.kakao.maps.Size(24, 35);
 
-      // 마커 이미지를 생성
-      const markerImage = new window.kakao.maps.MarkerImage(restaurantMarkerImage, imageSize);
+  //     // 마커 생성
+  //     restaurantMarkers[i] = new window.kakao.maps.Marker({
+  //       map: map, // 마커를 표시할 지도
+  //       position: latlng, // 마커를 표시할 위치
+  //       clickable: true,
+  //     });
 
-      // 마커 생성
-      restaurantMarkers[i] = new window.kakao.maps.Marker({
-        map: map, // 마커를 표시할 지도
-        position: latlng, // 마커를 표시할 위치
-        image: markerImage, // 마커 이미지
-        clickable: true,
-      });
+  //     // 마커에 표시될 customOverlay
+  //     const customOverlay = new window.kakao.maps.CustomOverlay({
+  //       position: new window.kakao.maps.LatLng(
+  //         restaurants?.[i].latitude + 0.00045,
+  //         restaurants?.[i].longitude - 0.00045,
+  //       ), // 마커를 표시할 위치
+  //       content: `${ReactDOMServer.renderToString(
+  //         <RestaurantOverlay
+  //           key={restaurants[i].restaurantId}
+  //           restaurant={restaurants[i]}
+  //           currentPosition={userAccessPosition}
+  //         />,
+  //       )}`,
+  //       xAnchor: 0.3,
+  //       yAnchor: 0.91,
+  //     });
 
-      // 마커에 표시될 customOverlay
-      const customOverlay = new window.kakao.maps.CustomOverlay({
-        position: new window.kakao.maps.LatLng(
-          restaurants?.[i].latitude + 0.00045,
-          restaurants?.[i].longitude - 0.00045,
-        ), // 마커를 표시할 위치
-        content: `${ReactDOMServer.renderToString(
-          <RestaurantOverlay
-            key={restaurants[i].restaurantId}
-            restaurant={restaurants[i]}
-            currentPosition={userAccessPosition}
-          />,
-        )}`,
-        xAnchor: 0.3,
-        yAnchor: 0.91,
-      });
+  //     toBeMap.push([restaurants?.[i].restaurantId, restaurantMarkers[i]]);
 
-      toBeMap.push([restaurants?.[i].restaurantId, restaurantMarkers[i]]);
+  //     window.kakao.maps.event.addListener(
+  //       restaurantMarkers[i],
+  //       'click',
+  //       markerClickCallback(map, customOverlay, restaurants?.[i]),
+  //     );
+  //   }
 
-      window.kakao.maps.event.addListener(
-        restaurantMarkers[i],
-        'click',
-        markerClickCallback(map, customOverlay, restaurants?.[i]),
-      );
-    }
-
-    setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
-  };
+  //   setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
+  // };
 
   const setMarkers = (map: KakaoMap) => {
-    console.log('setMarkers');
-
-    if (zoomLevel > 5 && restaurants.length) {
-      console.log('addClusterer');
-
+    // if (zoomLevel > 5 && restaurants.length) {
+    if (restaurants.length) {
       // 마커 클러스터러를 생성합니다
-      const clusterer = addClusterer(map, restaurants);
+      const clusterer = addClusterer(map, restaurants, userAccessPosition);
 
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
         // 현재 지도 레벨에서 1레벨 확대한 레벨
         const level = map.getLevel() - 1;
-
-        console.log('cluster ff: ', cluster.getCenter());
 
         // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
         map.setLevel(level, {anchor: cluster.getCenter()});
@@ -140,7 +128,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       return;
     }
 
-    addRestaurantMarkersOnMap(map, restaurants || []);
+    // addRestaurantMarkersOnMap(map, restaurants || []);
   };
 
   const onLoadKakaoMap = useCallback(
