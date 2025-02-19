@@ -4,6 +4,9 @@ import {RestaurantInfo} from '../types/restaurant';
 import {getDongName, navigateToRestaurant, setActiveMarker} from '../utils/utils';
 import {customOverayAtom, markerAtom} from '../stores/mapAtom';
 import {clickedRestaurantAtom} from '../stores/restaurantAtom';
+import RestaurantOverlay from '../components/RestaurantOverlay';
+import ReactDOMServer from 'react-dom/server';
+import React from 'react';
 
 // map 중심 좌표가 변경된 경우, 새로운 식당 데이터를 가져올 수 있도록 trigger 합니다.
 export const centerChangedHandler = (
@@ -80,22 +83,34 @@ export const markerClickCallback = (map: KakaoMap, customOverlay: KakaoCustomOve
   };
 };
 
-export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
-  console.log('add clusterer: ', map, restaurants);
-
+export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[], currentPosition: Position) => {
   const clusterer = new window.kakao.maps.MarkerClusterer({
     map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
     averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
-    minLevel: 6, // 클러스터 할 최소 지도 레벨
+    minLevel: 3, // 클러스터 할 최소 지도 레벨
     disableClickZoom: true,
   });
 
-  const markers = restaurants.map(
-    ({latitude, longitude}) =>
-      new window.kakao.maps.Marker({
-        position: new window.kakao.maps.LatLng(latitude, longitude),
-      }),
-  );
+  const markers = restaurants.map(({latitude, longitude, ...rest}) => {
+    const marker = new window.kakao.maps.Marker({
+      position: new window.kakao.maps.LatLng(latitude, longitude),
+    });
+
+    const customOverlay = new window.kakao.maps.CustomOverlay({
+      position: new window.kakao.maps.LatLng(latitude + 0.00045, longitude - 0.00045), // 마커를 표시할 위치
+      content: `${ReactDOMServer.renderToString(
+        React.createElement(RestaurantOverlay, {restaurant: {...rest, latitude, longitude}, currentPosition}),
+      )}`,
+      xAnchor: 0.3,
+      yAnchor: 0.91,
+    });
+
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      markerClickCallback(map, customOverlay, {...rest, latitude, longitude})();
+    });
+
+    return marker;
+  });
 
   clusterer.addMarkers(markers);
   console.log('add clusterer finishied');
