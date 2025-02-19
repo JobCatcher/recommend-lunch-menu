@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
+import {DISTANCE, getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
@@ -52,6 +52,7 @@ const Restaurant = ({
             <span>
               거리:{' '}
               {getDistanceFromLatLonInKm(latitude, longitude, currentPosition.latitude, currentPosition.longitude)}
+              {DISTANCE === 1000 ? ' m' : ' km'}
             </span>
           ) : (
             <></>

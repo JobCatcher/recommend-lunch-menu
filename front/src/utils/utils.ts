@@ -4,7 +4,7 @@ import {KakaoMap, KakaoMarker} from '../types/kakao';
  * 1 - km
  * 1000 - m
  */
-const DISTANCE = 1000;
+export const DISTANCE = 1000;
 
 export const getNumbers = (text: unknown) => {
   if (typeof text === 'string') {
