@@ -47,56 +47,12 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
   const [restaurantMarkersMap] = useAtom(restaurantMarkersAtom);
-  // const [zoomLevel, setZoomLevel] = useAtom(zoomLevelAtom);
-
-  // const addRestaurantMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInfo[]) => {
-  //   console.log('============== addMarker ==============');
-
-  //   const restaurantMarkers: KakaoMarker[] = new Array(restaurants.length);
-
-  //   // if (!restaurants.length && res)
-  //   for (let i = 0; i < restaurants?.length; i++) {
-  //     const latlng = new window.kakao.maps.LatLng(restaurants?.[i].latitude, restaurants?.[i].longitude);
-  //     // const imageSize = new window.kakao.maps.Size(24, 35);
-
-  //     // 마커 생성
-  //     restaurantMarkers[i] = new window.kakao.maps.Marker({
-  //       map: map, // 마커를 표시할 지도
-  //       position: latlng, // 마커를 표시할 위치
-  //       clickable: true,
-  //     });
-
-  //     // 마커에 표시될 customOverlay
-  //     const customOverlay = new window.kakao.maps.CustomOverlay({
-  //       position: new window.kakao.maps.LatLng(
-  //         restaurants?.[i].latitude + 0.00045,
-  //         restaurants?.[i].longitude - 0.00045,
-  //       ), // 마커를 표시할 위치
-  //       content: `${ReactDOMServer.renderToString(
-  //         <RestaurantOverlay
-  //           key={restaurants[i].restaurantId}
-  //           restaurant={restaurants[i]}
-  //           currentPosition={userAccessPosition}
-  //         />,
-  //       )}`,
-  //       xAnchor: 0.3,
-  //       yAnchor: 0.91,
-  //     });
-
-  //     toBeMap.push([restaurants?.[i].restaurantId, restaurantMarkers[i]]);
-
-  //     window.kakao.maps.event.addListener(
-  //       restaurantMarkers[i],
-  //       'click',
-  //       markerClickCallback(map, customOverlay, restaurants?.[i]),
-  //     );
-  //   }
-
-  //   setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
-  // };
 
   const setMarkers = (map: KakaoMap, restaurants?: RestaurantInfo[]) => {
-    // if (zoomLevel > 5 && restaurants.length) {
+    /**
+     * TODO
+     * 마커클러스터러 최초 1번만 생성되도록
+     */
     if (restaurants?.length) {
       // 마커 클러스터러를 생성합니다
       const clusterer = addClusterer(map, restaurants || [], userAccessPosition);
@@ -109,26 +65,8 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         map.setLevel(level, {anchor: cluster.getCenter()});
       });
 
-      // window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster) {
-      //   // 현재 지도 레벨에서 1레벨 확대한 레벨
-      //   const level = map.getLevel() - 1;
-
-      //   console.log('cc: ', cluster, cluster instanceof window.kakao.maps.MarkerClusterer);
-
-      //   // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
-      //   if (typeof cluster === 'object' && cluster !== null && '_clusterer' in cluster) {
-      //     const {getLat, getLng} = cluster.getCenter();
-      //     console.log('fff: ', getLat, getLng);
-
-      //     setZoomLevel(level);
-      //     map.setLevel(level, {anchor: cluster.getCenter()});
-      //     setCurrentPosition({latitude: getLat(), longitude: getLng()});
-      //   }
-      // });
       return;
     }
-
-    // addRestaurantMarkersOnMap(map, restaurants || []);
   };
 
   const onLoadKakaoMap = useCallback(
@@ -159,8 +97,6 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         currentPositionMarker.setMap(mapRef.current!);
         setMapAtom(mapRef.current!);
 
-        // setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
-
         window.kakao.maps.event.addListener(mapRef.current, 'dragend', () =>
           centerChangedHandler(mapRef.current!, restaurants, setDraggedPosition),
         );
@@ -169,13 +105,12 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         );
       });
     },
-    // [],
     [draggedPosition],
   );
 
   const getRestaurants = useCallback(
     async (initLatitude?: number, initLongitude?: number) => {
-      console.log('getRestau');
+      console.log('getRestaunts() 실행');
 
       const latitude = initLatitude || draggedPosition.latitude;
       const longitude = initLongitude || draggedPosition.longitude;
@@ -208,7 +143,6 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         console.error(error);
       }
     },
-    // [],
     [draggedPosition],
   );
 
@@ -242,7 +176,6 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       };
     },
     [draggedPosition],
-    // [script, draggedPosition, onLoadKakaoMap],
   );
 
   useEffect(() => {
@@ -275,26 +208,6 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       });
     })();
   }, [draggedPosition]);
-
-  // useEffect(() => {
-  //   console.log('zzzzz cha');
-
-  //   (async () => {
-  //     const {latitude, longitude} = draggedPosition;
-
-  //     // 최초에는 위,경도가 0으로 이 경우에는 호출 x
-  //     if (!latitude && !longitude) return;
-
-  //     console.log('여긴 나옴');
-
-  //     await getRestaurants().then(res => {
-  //       setRestaurants(res);
-  //       setRestaurantsAtom({restaurants: res});
-  //       // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
-  //       if (mapRef.current) setMarkers(mapRef.current);
-  //     });
-  //   })();
-  // }, [zoomLevel]);
 
   // forwardRef
   const renderChildren = () => {
