@@ -95,11 +95,11 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
   //   setRestaurantMarkersAtom({markers: new Map<number, KakaoMarker>(toBeMap)});
   // };
 
-  const setMarkers = (map: KakaoMap) => {
+  const setMarkers = (map: KakaoMap, restaurants?: RestaurantInfo[]) => {
     // if (zoomLevel > 5 && restaurants.length) {
-    if (restaurants.length) {
+    if (restaurants?.length) {
       // 마커 클러스터러를 생성합니다
-      const clusterer = addClusterer(map, restaurants, userAccessPosition);
+      const clusterer = addClusterer(map, restaurants || [], userAccessPosition);
 
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
         // 현재 지도 레벨에서 1레벨 확대한 레벨
@@ -134,7 +134,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
   const onLoadKakaoMap = useCallback(
     async (latitude: number, longitude: number) => {
       window.kakao.maps.load(() => {
-        console.log('kakaomap load');
+        console.log('kakaomap load 실행');
 
         const container = document.getElementById('map');
         const options = {
@@ -209,7 +209,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       }
     },
     // [],
-    [draggedPosition, zoomLevel],
+    [draggedPosition],
   );
 
   const initializeMap = useCallback(
@@ -241,7 +241,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         }
       };
     },
-    [draggedPosition, zoomLevel],
+    [draggedPosition],
     // [script, draggedPosition, onLoadKakaoMap],
   );
 
@@ -271,10 +271,10 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         setRestaurantsAtom({restaurants: res});
         // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
 
-        if (mapRef.current) setMarkers(mapRef.current);
+        if (mapRef.current) setMarkers(mapRef.current, res);
       });
     })();
-  }, [draggedPosition, zoomLevel]);
+  }, [draggedPosition]);
 
   // useEffect(() => {
   //   console.log('zzzzz cha');
