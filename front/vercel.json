@@ -1,5 +1,3 @@
 {
-  "builds": [{"src": "dist/", "use": "@vercel/static"}],
-  "rewrites": [{"source": "/(.*)", "destination": "/index.html"}],
-  "redirects": [{"source": "/favicon.ico", "destination": "/public/favicon.ico"}]
+  "rewrites": [{"source": "/(.*)", "destination": "/index.html"}]
 }
