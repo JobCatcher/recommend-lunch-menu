@@ -86,9 +86,9 @@ async def scrape_data(url: str):
                 blog_review_count = answer[1] if len(answer) > 1 else ""
 
             return {
-                '별점': extract_numbers(star_rating),
-                '방문자리뷰': extract_numbers(visitor_review_count),
-                '블로그리뷰': extract_numbers(blog_review_count)
+                'starRating': extract_numbers(star_rating),
+                'visitorReviewCount': extract_numbers(visitor_review_count),
+                'blogReviewCount': extract_numbers(blog_review_count)
             }
 
 def get_queryUrl(query: str) -> str:

@@ -56,6 +56,7 @@ interface KakaoMarkerOptions {
 export interface KakaoMarker {
   setMap: (map: KakaoMap | null) => void;
   setZIndex: (index: number) => void;
+  getPosition: () => Position;
 }
 
 interface KakaoInfoWindowOptions {
