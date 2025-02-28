@@ -30,7 +30,7 @@ HEADERS = {
 }
 
 # Google Places API를 이용해 인근 음식점 정보를 가져오는 함수
-async def fetch_nearby_restaurants(latitude: float, longitude: float, radius: float = 500, max_results: int = 10):
+async def fetch_nearby_restaurants(latitude: float, longitude: float, radius: float = 500, max_results: int = 15):
     body = {
         "includedTypes": ["restaurant"],
         "maxResultCount": max_results,
@@ -61,7 +61,11 @@ async def scrape_data(url: str):
             # 예시: 평점, 방문자 리뷰, 블로그 리뷰 수 크롤링 (실제 크롤링 로직은 페이지 구조에 따라 수정 필요)
             span_tags = soup.find_all('span', {'class': 'PXMot'})
             if len(span_tags) == 0:
-                return {}
+                return {  # 필드가 항상 포함되도록 기본값 반환
+                    'rating': 0,
+                    'visitedReviewCount': 0,
+                    'reviewCount': 0
+                }
 
             for tag in span_tags:
                 # 예시: 특정 클래스가 있으면 평점 정보를 추출
@@ -86,9 +90,9 @@ async def scrape_data(url: str):
                 blog_review_count = answer[1] if len(answer) > 1 else ""
 
             return {
-                'starRating': extract_numbers(star_rating),
-                'visitorReviewCount': extract_numbers(visitor_review_count),
-                'blogReviewCount': extract_numbers(blog_review_count)
+                'rating': extract_numbers(star_rating)[0] if isinstance(extract_numbers(star_rating), list) and extract_numbers(star_rating) else 0,
+                'visitedReviewCount': extract_numbers(visitor_review_count)[0] if isinstance(extract_numbers(visitor_review_count), list) and extract_numbers(visitor_review_count) else 0,
+                'reviewCount': extract_numbers(blog_review_count)[0] if isinstance(extract_numbers(blog_review_count), list) and extract_numbers(blog_review_count) else 0
             }
 
 def get_queryUrl(query: str) -> str:
@@ -113,7 +117,7 @@ async def get_restaurants(latitude: float = Query(...), longitude: float = Query
         scraped_info = await scrape_data(formatted_url)
         enriched_info = {
             **scraped_info,
-            'name': name,
+            'title': name,
             'address': formatted_address,
             'googleId': googleId,
             'latitude': location.get('latitude', 'N/A'),

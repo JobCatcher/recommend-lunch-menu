@@ -21,8 +21,14 @@ public class Restaurant {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "google_id", nullable = true)
+    private String googleId;
+
     @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "address", nullable = true)
+    private String address;
 
     @Column(name = "latitude", nullable = false)
     private Double latitude; //위도
@@ -39,6 +45,9 @@ public class Restaurant {
     @Column(name = "review_count", nullable = false)
     private Integer reviewCount;
 
+    @Column(name = "visited_review_count", nullable = true)
+    private Integer visitedReviewCount;
+
     @Enumerated(value = EnumType.STRING)
     @Column(name = "category", nullable = false)
     private Category category;
@@ -50,13 +59,17 @@ public class Restaurant {
     private List<Thumbnail> thumbnails = new ArrayList<>();
 
     @Builder
-    public Restaurant(String title, Double latitude, Double longitude, String geoHash, Double rating, Integer reviewCount, Category category) {
+    public Restaurant(String googleId, String title, String address, Double latitude, Double longitude,
+                      String geoHash, Double rating, Integer reviewCount, Integer visitedReviewCount, Category category) {
+        this.googleId = googleId;
         this.title = title;
+        this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.geoHash = geoHash;
         this.rating = rating;
         this.reviewCount = reviewCount;
+        this.visitedReviewCount = visitedReviewCount;
         this.category = category;
     }
 
@@ -66,5 +79,13 @@ public class Restaurant {
 
     public void addThumbnail(Thumbnail thumbnail) {
         this.thumbnails.add(thumbnail);
+    }
+
+    public void updateCrawlingData(String title, String address, Double rating, Integer reviewCount, Integer visitedReviewCount) {
+        this.title = title;
+        this.address = address;
+        this.rating = rating;
+        this.reviewCount = reviewCount;
+        this.visitedReviewCount = visitedReviewCount;
     }
 }

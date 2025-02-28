@@ -20,25 +20,12 @@ public class CrawlingService {
                 .get()
                 .uri(uriBuilder -> uriBuilder
 //                        .path("/restaurants/crawling")
-                        .path("/restaurants/search/v3")
+                        .path("/api/restaurants/search")
                         .queryParam("latitude", latitude)
                         .queryParam("longitude", longitude)
                         .build())
                 .retrieve()
                 .bodyToFlux(RestaurantCrawlingDto.class)
                 .collectList();
-    }
-
-    public Flux<RestaurantCrawlingDto> testFetchRestaurantData(double latitude, double longitude) {
-        return webClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-//                        .path("/restaurants/crawling")
-                        .path("/restaurants/search/v3")
-                        .queryParam("latitude", latitude)
-                        .queryParam("longitude", longitude)
-                        .build())
-                .retrieve()
-                .bodyToFlux(RestaurantCrawlingDto.class);
     }
 }

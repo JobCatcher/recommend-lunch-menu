@@ -14,4 +14,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, R
             "WHERE r.geoHash IN :geoHashs " +
             "ORDER BY r.id ASC, t.id ASC")
     List<Object[]> findRestaurantInRangeV1(@Param("geoHashs") List<String> geoHashs);
+
+    @Query("SELECT r FROM Restaurant r WHERE r.googleId IN :googleIds")
+    List<Restaurant> findByGoogleIdIn(List<String> googleIds);
 }

@@ -12,7 +12,8 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient(WebClient.Builder builder) {
         return builder
-                .baseUrl("https://api.jobcatcher.shop")
+//                .baseUrl("https://api.jobcatcher.shop")
+                .baseUrl("http://localhost:5001")
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
                 })

@@ -2,6 +2,7 @@ package job.catcher.restaurant.global.config;
 
 import job.catcher.restaurant.global.response.RestaurantCrawlingDto;
 import job.catcher.restaurant.global.service.CrawlingService;
+import job.catcher.restaurant.restaurant.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -29,6 +30,7 @@ public class RestaurantBatchConfig {
     private final PlatformTransactionManager transactionManager;
 
     private final CrawlingService crawlingService;
+    private final RestaurantService restaurantService;
 
     @Bean
     public Job restaurantJob() {
@@ -57,8 +59,7 @@ public class RestaurantBatchConfig {
         System.out.println("//=== crawlTasklet ===//");
         return (contribution, chunkContext) -> {
             // 크롤링 로직 (HTTP GET 요청)
-//            List<RestaurantCrawlingDto> restaurantCrawlingDtos = fetchRestaurantData();
-            List<RestaurantCrawlingDto.data> restaurantCrawlingDtos = testFetchRestaurantData().data();
+            List<RestaurantCrawlingDto> restaurantCrawlingDtos = fetchRestaurantData();
             // Step 간 데이터를 공유하기 위해 ExecutionContext에 저장
             chunkContext.getStepContext().getStepExecution().getJobExecution()
                     .getExecutionContext()
@@ -85,11 +86,7 @@ public class RestaurantBatchConfig {
                 throw new RuntimeException("No data found in ExecutionContext.");
             }
             // 비동기 저장 로직 호출
-//            CompletableFuture.allOf(
-//                    restaurantCrawlingDtos.stream()
-//                            .map(dto -> CompletableFuture.runAsync(() -> saveOrUpdateToDatabase(dto)))
-//                            .toArray(CompletableFuture[]::new)
-//            ).join();
+            restaurantService.saveOrUpdateCrawlingData(restaurantCrawlingDtos);
 
             return RepeatStatus.FINISHED;
         };
@@ -98,23 +95,9 @@ public class RestaurantBatchConfig {
     private List<RestaurantCrawlingDto> fetchRestaurantData() {
         double latitude = 37.378937695744746;
         double longitude = 127.11387857445837;
-        // HTTP GET 요청 처리 (RestTemplate, WebClient 등 사용)
+        // HTTP GET 요청 처리 (WebClient 사용)
         // 데이터를 RestaurantDto List로 반환
         return crawlingService.fetchRestaurantData(latitude, longitude)
                 .block();
-    }
-
-    private RestaurantCrawlingDto testFetchRestaurantData() {
-        double latitude = 37.378937695744746;
-        double longitude = 127.11387857445837;
-        // HTTP GET 요청 처리 (RestTemplate, WebClient 등 사용)
-        // 데이터를 RestaurantDto List로 반환
-        return crawlingService.testFetchRestaurantData(latitude, longitude).blockFirst();
-    }
-
-    @Async
-    private void saveOrUpdateToDatabase(RestaurantCrawlingDto restaurantCrawlingDto) {
-        // JPA 또는 QueryDSL을 사용한 데이터 저장/업데이트 로직
-        // 비동기 저장 로직 호출
     }
 }
