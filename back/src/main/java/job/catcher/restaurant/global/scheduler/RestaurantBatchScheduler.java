@@ -20,8 +20,7 @@ public class RestaurantBatchScheduler {
         this.restaurantJob = restaurantJob;
     }
 
-//    @Scheduled(cron = "0 0 0 * * *")
-    @Scheduled(cron = "*/59 * * * * *")
+//    @Scheduled(cron = "*/59 * * * * *")
     public void runJob() {
         System.out.println("//=== RestaurantBatchScheduler ===//");
         try {
