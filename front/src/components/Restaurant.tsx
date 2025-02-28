@@ -1,42 +1,47 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
+import {DISTANCE, getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
+import NoImage from '../../public/no-thumbnail.jpg';
 
 interface RestaurantProps {
   restaurant: RestaurantInfo;
   currentPosition?: {latitude: number; longitude: number};
 }
 
-const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
-  if (!restaurant) return;
-
-  const {id, title, category, reviewCount, rating, thumbnails, latitude, longitude} = restaurant;
+const Restaurant = ({
+  restaurant: {restaurantId, title, category, reviewCount, rating, thumbnails, latitude, longitude},
+  currentPosition,
+}: RestaurantProps) => {
   const map = useAtomValue(mapAtom);
   const {markers} = useAtomValue(restaurantMarkersAtom);
   const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
 
   const handleClickRestaurant = () => {
-    const mapMarker = markers.get(id);
+    const mapMarker = markers.get(restaurantId);
+    const latlng = new window.kakao.maps.LatLng(latitude, longitude);
     triggerEvent('click', mapMarker); // 인포윈도우 띄우기
 
-    setActiveRestaurant({activeRestaurantId: id});
-    map!.panTo(new window.kakao.maps.LatLng(latitude, longitude));
+    setActiveRestaurant({activeRestaurantId: restaurantId});
+    map!.panTo(latlng);
+    map?.setLevel(4, {anchor: latlng});
   };
 
   return (
     <RestaurantContainer onClick={handleClickRestaurant}>
       <ImageContainer>
-        {thumbnails.map((image, idx) => {
-          return (
-            <img key={`${title}-${idx}`} src={image || 'https://via.placeholder.com/150'} alt={`${title} 이미지`} />
-          );
-        })}
+        {thumbnails.length ? (
+          thumbnails.map(({url, thumbnailId}) => {
+            return <img key={`${title}-${thumbnailId}`} src={url || NoImage} alt={`${title} 이미지`} />;
+          })
+        ) : (
+          <EmptyImage src={NoImage} alt={`${title} 이미지`} />
+        )}
       </ImageContainer>
       <InfoContainer>
-        <Title>{title} </Title>
+        `<Title>{title} </Title>
         <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
         <Review>
@@ -47,6 +52,7 @@ const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
             <span>
               거리:{' '}
               {getDistanceFromLatLonInKm(latitude, longitude, currentPosition.latitude, currentPosition.longitude)}
+              {DISTANCE === 1000 ? ' m' : ' km'}
             </span>
           ) : (
             <></>
@@ -66,7 +72,8 @@ const Title = styled.h3`
 `;
 
 const RestaurantContainer = styled.li`
-  max-width: 320px;
+  max-width: 230px;
+  width: 230px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -89,6 +96,7 @@ const ImageContainer = styled.div`
 
   img {
     width: 150px;
+    min-width: 150px;
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
@@ -117,4 +125,8 @@ const Rating = styled.p`
   font-size: 12px;
   color: #999;
   margin: 0;
+`;
+
+const EmptyImage = styled.img`
+  width: 100% !important;
 `;

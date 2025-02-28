@@ -1,8 +1,10 @@
+import {KakaoMap, KakaoMarker} from '../types/kakao';
+
 /**
  * 1 - km
  * 1000 - m
  */
-const DISTANCE = 1000;
+export const DISTANCE = 1000;
 
 export const getNumbers = (text: unknown) => {
   if (typeof text === 'string') {
@@ -44,12 +46,12 @@ export const getDongName = async (longitude: number, latitude: number) => {
 };
 
 export const isMobile = () => {
-  let isMobile = navigator.userAgentData?.mobile;
+  const isMobile = navigator.userAgentData?.mobile;
 
   return !!isMobile;
 };
 
-export const setActiveMarker = (map: any, activeMarkerAtom: any, latitude: number, longitude: number) => {
+export const setActiveMarker = (map: KakaoMap, activeMarkerAtom: KakaoMarker, latitude: number, longitude: number) => {
   if (activeMarkerAtom) {
     activeMarkerAtom.setMap(null);
   }
@@ -58,7 +60,7 @@ export const setActiveMarker = (map: any, activeMarkerAtom: any, latitude: numbe
   const imageSize = new window.kakao.maps.Size(28, 38);
   const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
-  let marker = new window.kakao.maps.Marker({
+  const marker = new window.kakao.maps.Marker({
     map: map!,
     position: new window.kakao.maps.LatLng(latitude, longitude),
     image: markerImage,

@@ -14,9 +14,18 @@ interface KakaoMaps {
   load: (callback: () => void) => void;
   event: {
     trigger: (target: KakaoMarker | KakaoMap, type: string) => void;
-    addListener: (target: KakaoMarker | KakaoMap, type: string, callback: (...args: unknown[]) => void) => void;
+    addListener: (
+      target: KakaoMarker | KakaoMap | KakaoMarkerClusterer,
+      type: string,
+      callback: (...args: unknown[]) => void,
+    ) => void;
     removeListener: (target: KakaoMarker | KakaoMap, type: string, callback: (...args: unknown[]) => void) => void;
   };
+}
+
+export interface Position {
+  latitude: number;
+  longitude: number;
 }
 
 interface KakaoLatLng {
@@ -34,6 +43,7 @@ export interface KakaoMap {
   setCenter: (latlng: KakaoLatLng) => void;
   getCenter: () => KakaoLatLng;
   getLevel: () => number;
+  setLevel: (level: number, {anchor}: {anchor: KakaoLatLng}) => void;
 }
 
 interface KakaoMarkerOptions {
@@ -46,6 +56,7 @@ interface KakaoMarkerOptions {
 export interface KakaoMarker {
   setMap: (map: KakaoMap | null) => void;
   setZIndex: (index: number) => void;
+  getPosition: () => Position;
 }
 
 interface KakaoInfoWindowOptions {
@@ -77,14 +88,16 @@ interface KakaoMarkerClustererOptions {
   averageCenter: boolean; // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
   minLevel: number;
   text?: string[];
+  disableClickZoom?: boolean;
 }
 
-interface KakaoMarkerClusterer {
+export interface KakaoMarkerClusterer {
   addMarkers(markers: KakaoMarker[]): unknown;
   map: KakaoMap; // 마커들을 클러스터로 관리하고 표시할 지도 객체
   averageCenter: boolean; // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
   minLevel: number; // 클러스터 할 최소 지도 레벨
   // addMarkers:;
+  getCenter: () => KakaoLatLng;
 }
 
 interface KakaoSize {
