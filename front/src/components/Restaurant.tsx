@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {DISTANCE, getDistanceFromLatLonInKm, triggerEvent} from '../utils/utils';
+import {DISTANCE, getDistanceFromLatLonInKm, isMobile, triggerEvent} from '../utils/utils';
 import {useAtom, useAtomValue} from 'jotai';
 import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
@@ -19,6 +19,8 @@ const Restaurant = ({
   const {markers} = useAtomValue(restaurantMarkersAtom);
   const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
 
+  const mobile = isMobile();
+
   const handleClickRestaurant = () => {
     const mapMarker = markers.get(restaurantId);
     const latlng = new window.kakao.maps.LatLng(latitude, longitude);
@@ -30,7 +32,7 @@ const Restaurant = ({
   };
 
   return (
-    <RestaurantContainer onClick={handleClickRestaurant}>
+    <RestaurantContainer mobile={mobile} onClick={handleClickRestaurant}>
       <ImageContainer>
         {thumbnails.length ? (
           thumbnails.map(({url, thumbnailId}) => {
@@ -41,7 +43,7 @@ const Restaurant = ({
         )}
       </ImageContainer>
       <InfoContainer>
-        `<Title>{title} </Title>
+        <Title mobile={mobile}>{title} </Title>
         <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
         <Review>
@@ -65,15 +67,15 @@ const Restaurant = ({
 
 export default Restaurant;
 
-const Title = styled.h3`
-  font-size: 18px;
+const Title = styled.h3<{mobile: boolean}>`
+  font-size: ${props => (props.mobile ? '14px' : '18px')};
   font-weight: bold;
   margin: 0 0 5px;
 `;
 
-const RestaurantContainer = styled.li`
-  max-width: 230px;
-  width: 230px;
+const RestaurantContainer = styled.li<{mobile: boolean}>`
+  max-width: ${props => (props.mobile ? '150px' : '230px')};
+  width: ${props => (props.mobile ? '150px' : '230px')};
   display: flex;
   flex-direction: column;
   align-items: flex-start;

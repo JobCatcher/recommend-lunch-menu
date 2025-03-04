@@ -46,9 +46,9 @@ export const getDongName = async (longitude: number, latitude: number) => {
 };
 
 export const isMobile = () => {
-  const isMobile = navigator.userAgentData?.mobile;
+  const isMobile = navigator.userAgent.includes('Mobi');
 
-  return !!isMobile;
+  return isMobile;
 };
 
 export const setActiveMarker = (map: KakaoMap, activeMarkerAtom: KakaoMarker, latitude: number, longitude: number) => {
