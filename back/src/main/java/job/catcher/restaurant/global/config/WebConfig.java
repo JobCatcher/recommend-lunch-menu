@@ -13,7 +13,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:5173",
                         "https://api.jobcatcher.shop",
-                        "https://jobcatcher.shop"
+                        "https://jobcatcher.shop",
+                        "https://www.jobcatcher.shop"
                 ) // 허용할 도메인 지정
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
                 .allowedHeaders("*") // 허용할 헤더
