@@ -78,6 +78,8 @@ export const markerClickCallback = (map: KakaoMap, customOverlay: KakaoCustomOve
     store.set(markerAtom, activeMarker);
     store.set(clickedRestaurantAtom, {activeRestaurantId: restaurantId});
 
+    map.panTo(new window.kakao.maps.LatLng(restaurant.latitude, restaurant.longitude));
+
     // add eventListener On close button
     addEvListenerOnCustomOverlay(activeMarker, customOverlay, restaurant);
   };
