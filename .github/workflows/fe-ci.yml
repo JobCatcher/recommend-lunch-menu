@@ -24,7 +24,11 @@ jobs:
           cache: "npm"
 
       - run: npm ci
-      - run: npm test:run
+        working-directory: ./front
+
+      - run: | ## working-directory와 같은 의미.
+          cd front
+          npm test:run
 
       - name: Code Coverage
         uses: davelosert/vitest-coverage-report-action@v2.7.0
