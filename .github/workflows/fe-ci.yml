@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Setup node.js
         uses: actions/setup-node@v4
@@ -27,4 +27,4 @@ jobs:
       - run: npm test:run
 
       - name: Code Coverage
-      - uses: davelosert/vitest-coverage-report-action@v2.7.0
+        uses: davelosert/vitest-coverage-report-action@v2.7.0
