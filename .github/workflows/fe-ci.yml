@@ -7,11 +7,11 @@ on:
   push:
     branches: ["feat/*"]
     paths:
-      - "front/**"
+      - front/**
   pull_request:
     branches: ["dev", "master"]
     paths:
-      - "front/**"
+      - front/**
 
 jobs:
   test:
