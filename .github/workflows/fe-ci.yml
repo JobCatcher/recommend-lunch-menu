@@ -27,12 +27,15 @@ jobs:
           node-version: 18.x
           cache: "npm"
 
-      - run: npm ci
-        working-directory: front
+      - run: |
+          cd front
+          npm ci
 
-      - run: npm test:run
-        working-directory: front
+      - run: |
+          cd front
+          npm test:run
 
       - name: Code Coverage
-        uses: davelosert/vitest-coverage-report-action@v2.7.0
-        working-directory: front
+        uses: |
+          cd front 
+          davelosert/vitest-coverage-report-action@v2.7.0
