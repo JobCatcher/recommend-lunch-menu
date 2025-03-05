@@ -5,9 +5,9 @@ name: frontend CI
 
 on:
   push:
-    branches: ["feat/*"]
+    branches: ['feat/*']
   pull_request:
-    branches: ["dev", "master"]
+    branches: ['dev', 'master']
 
 jobs:
   test:
@@ -21,14 +21,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: "npm"
+          cache: 'npm'
 
       - run: npm ci
-        working-directory: ./front
-
       - run: npm test:run
-        working-directory: ./front
 
       - name: Code Coverage
         uses: davelosert/vitest-coverage-report-action@v2.7.0
-        working-directory: ./front
