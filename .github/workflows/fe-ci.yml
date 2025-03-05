@@ -26,9 +26,9 @@ jobs:
       - run: npm ci
         working-directory: ./front
 
-      - run: | ## working-directory와 같은 의미.
-          cd front
-          npm test:run
+      - run: npm test:run
+        working-directory: ./front
 
       - name: Code Coverage
         uses: davelosert/vitest-coverage-report-action@v2.7.0
+        working-directory: ./front
