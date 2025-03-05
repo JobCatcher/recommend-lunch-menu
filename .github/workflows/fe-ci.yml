@@ -37,5 +37,3 @@ jobs:
 
       - name: Code Coverage
         uses: davelosert/vitest-coverage-report-action@v2.7.0 #uses에는 cd 이런거 쓰면 안된다고 함. yaml 파싱하다가 에러가 나고, 아예 실행이 안되기도 함
-        with:
-          working-directory: front
