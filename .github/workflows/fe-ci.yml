@@ -27,7 +27,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.x
-          cache: "npm"
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+          # 문제는 리포지토리를 "front" 폴더로 체크아웃하면서, setup-node 액션이 기본적으로 루트 디렉토리에서 package-lock 파일을 찾으려고 하기 때문이에요.
+          # 즉, package-lock.json은 실제로는 "front" 폴더 안에 존재하는데, setup-node는 루트에서 찾으려 하다가 "찾지 못함" 에러를 발생시키는 거죠.
+          # 이를 해결하려면 setup-node 액션에 package-lock.json의 경로를 알려줘야 해요.
+          # 즉, cache-dependency-path 옵션을 사용하여 "front/package-lock.json" 경로를 지정해주면 됩니다.
 
       - name: Check working directory
         run:
