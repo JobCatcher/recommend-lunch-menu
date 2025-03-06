@@ -21,5 +21,5 @@ test('1 + 3 is', () => {
 });
 
 test('1 + 3 is', () => {
-  expect(4).toBe(4);
+  expect(4).not.toBe(5);
 });
