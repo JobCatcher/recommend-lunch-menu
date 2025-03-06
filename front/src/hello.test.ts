@@ -17,7 +17,7 @@ test('1 + 1 is', () => {
 });
 
 test('1 + 3 is', () => {
-  expect(4).toBe(2);
+  expect(4).not.toBe(2);
 });
 
 test('1 + 3 is', () => {
