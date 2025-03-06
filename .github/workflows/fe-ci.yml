@@ -30,12 +30,20 @@ jobs:
           cache: "npm"
 
       - name: Check working directory
-        run: pwd
+        run:
+          pwd
+          # 이 스텝은 현재 기본 디렉토리가 워크스페이스 루트이므로, 현재 폴더 경로가 출력됨
+          # checkout으로 인해 "front" 폴더가 생성되었음을 확인할 수 있음
+
+      - name: Install dependencies
+        run: npm ci
         working-directory: front
 
-      - run: npm ci
-
-      - run: npm test:run
+      - name: Run tests
+        run: npm test:run
+        working-directory: front
 
       - name: Code Coverage
         uses: davelosert/vitest-coverage-report-action@v2.7.0 #uses에는 cd 이런거 쓰면 안된다고 함. yaml 파싱하다가 에러가 나고, 아예 실행이 안되기도 함
+        with:
+          working-directory: front
