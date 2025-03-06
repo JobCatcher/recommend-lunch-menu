@@ -35,6 +35,9 @@ jobs:
           # 즉, cache-dependency-path 옵션을 사용하여 "front/package-lock.json" 경로를 지정해주면 됩니다.
 
       - name: Check working directory
+        run: pwd
+          
+      - name: Check working directory
         run:
           pwd
           # 이 스텝은 현재 기본 디렉토리가 워크스페이스 루트이므로, 현재 폴더 경로가 출력됨
