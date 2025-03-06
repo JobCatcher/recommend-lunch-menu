@@ -14,7 +14,7 @@ on:
       - "front/**"
 
 jobs:
-  test:
+  test-on-frontend:
     runs-on: ubuntu-latest
 
     steps:
