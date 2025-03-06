@@ -50,7 +50,7 @@ jobs:
         working-directory: front
 
       - name: Run tests
-        run: npm test:run
+        run: npm run test:run
         working-directory: front
 
       - name: Code Coverage
