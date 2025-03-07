@@ -1,0 +1,56 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: frontend CI
+
+on:
+  push:
+    branches: ["feat/*"]
+    paths:
+      - "front/**"
+  pull_request:
+    branches: ["dev", "master"]
+    paths:
+      - "front/**"
+
+jobs:
+  test-on-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (only front/)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            front
+          sparse-checkout-cone-mode: false
+
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+          # 문제는 리포지토리를 "front" 폴더로 체크아웃하면서, setup-node 액션이 기본적으로 루트 디렉토리에서 package-lock 파일을 찾으려고 하기 때문이에요.
+          # 즉, package-lock.json은 실제로는 "front" 폴더 안에 존재하는데, setup-node는 루트에서 찾으려 하다가 "찾지 못함" 에러를 발생시키는 거죠.
+          # 이를 해결하려면 setup-node 액션에 package-lock.json의 경로를 알려줘야 해요.
+          # 즉, cache-dependency-path 옵션을 사용하여 "front/package-lock.json" 경로를 지정해주면 됩니다.
+
+      - name: Check working directory
+        run:
+          pwd
+          # 이 스텝은 현재 기본 디렉토리가 워크스페이스 루트이므로, 현재 폴더 경로가 출력됨
+          # checkout으로 인해 "front" 폴더가 생성되었음을 확인할 수 있음
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: front
+
+      - name: Run tests
+        run: npm run test:run
+        working-directory: front
+
+      - name: Code Coverage
+        uses: davelosert/vitest-coverage-report-action@v2.7.0 #uses에는 cd 이런거 쓰면 안된다고 함. yaml 파싱하다가 에러가 나고, 아예 실행이 안되기도 함
+        with:
+          json-summary-path: front/coverage/coverage-summary.json
