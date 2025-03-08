@@ -33,7 +33,7 @@ jobs:
 
       - name: Add Fork Repository as Remote
         run: |
-          git remote add fork https://github.com/lecto17/recommend-lunch-menu.git
+          git remote add fork https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git
           git fetch fork
 
       - name: Sync Fork with Upstream (Organization Repository)
