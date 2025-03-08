@@ -39,7 +39,7 @@ jobs:
       - name: Sync Fork with Upstream (Organization Repository)
         run: |
           git checkout dev
-          git merge --no-edit origin/dev
+          git merge --no-edit fork/dev
           git push fork dev
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
