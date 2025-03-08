@@ -13,7 +13,7 @@ describe('getDistanceFromLatLonInKm', () => {
   });
 });
 
-describe('isMobile', () => {
+describe('isMobile test', () => {
   it('should return true if the user is on a mobile device', () => {
     // 모바일 환경을 흉내 내기 위해 navigator.userAgent를 모킹
     Object.defineProperty(window.navigator, 'userAgent', {
