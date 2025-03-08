@@ -164,15 +164,6 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         // 컴포넌트 언마운트 시 스크립트 제거
         document.head.removeChild(script);
         script.removeEventListener('load', () => onLoadKakaoMap(initLatitude, initLongitude));
-
-        if (mapRef.current) {
-          // window.kakao.maps.event.removeListener(mapRef.current, 'dragend', () =>
-          //   centerChangedHandler(mapRef.current!, setDraggedPosition),
-          // );
-          // window.kakao.maps.eveant.removeListener(mapRef.current, 'zoom_changed', () =>
-          //   zoomChangedHandler(mapRef.current!, setZoomLevel),
-          // );
-        }
       };
     },
     [draggedPosition],
