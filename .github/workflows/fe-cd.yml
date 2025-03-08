@@ -40,7 +40,8 @@ jobs:
         run: |
           git checkout dev
           git merge --no-edit fork/dev
-          git push fork dev
+          git remote -v
+          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
