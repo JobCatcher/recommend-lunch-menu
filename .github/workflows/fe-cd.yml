@@ -3,6 +3,10 @@
 
 name: CI/CD with GitHub Actions
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   push:
     branches: ["master", "dev"]
@@ -21,7 +25,6 @@ jobs:
           repository: JobCatcher/recommend-lunch-menu # Organization의 원본 레포
           sparse-checkout: |
             front
-          sparse-checkout-cone-mode: false
 
       - name: Configure Git for Syncing Fork
         run: |
@@ -38,6 +41,8 @@ jobs:
           git checkout dev
           git merge --no-edit origin/dev
           git push fork dev
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
