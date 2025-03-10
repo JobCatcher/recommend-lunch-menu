@@ -50,14 +50,12 @@ const Restaurant = ({
           리뷰: {reviewCount} / 별점: {rating}
         </Review>
         <Rating>
-          {currentPosition ? (
+          {currentPosition && (
             <span>
               거리:{' '}
               {getDistanceFromLatLonInKm(latitude, longitude, currentPosition.latitude, currentPosition.longitude)}
               {DISTANCE === 1000 ? ' m' : ' km'}
             </span>
-          ) : (
-            <></>
           )}
         </Rating>
       </InfoContainer>
