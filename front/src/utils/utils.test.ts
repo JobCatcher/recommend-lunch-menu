@@ -19,6 +19,7 @@ describe('isMobile test', () => {
     Object.defineProperty(window.navigator, 'userAgent', {
       value:
         'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/537.36 (KHTML, like Gecko) Mobile/15E148',
+      configurable: true,
     });
 
     expect(isMobile()).toBe(true);
@@ -29,6 +30,7 @@ describe('isMobile test', () => {
     Object.defineProperty(window.navigator, 'userAgent', {
       value:
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      configurable: true,
     });
 
     expect(isMobile()).toBe(false);
