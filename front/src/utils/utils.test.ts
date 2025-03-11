@@ -1,5 +1,5 @@
-import {describe, expect, it} from 'vitest';
-import {getDistanceFromLatLonInKm, isMobile} from './utils';
+import {afterEach, beforeEach, describe, expect, it, MockInstance, vi} from 'vitest';
+import {getDistanceFromLatLonInKm, isMobile, navigateToRestaurant} from './utils';
 
 describe('getDistanceFromLatLonInKm', () => {
   it('should return 0 if both points are the same', () => {
@@ -34,5 +34,29 @@ describe('isMobile test', () => {
     });
 
     expect(isMobile()).toBe(false);
+  });
+});
+
+describe('navigateToRestaurant', () => {
+  let openSpy: MockInstance<typeof window.open>;
+
+  beforeEach(() => {
+    openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+  });
+
+  afterEach(() => {
+    openSpy.mockRestore();
+  });
+
+  it("should open a new tab with '수내역 <storeName>' when dongName is not provided", () => {
+    navigateToRestaurant('김밥천국');
+
+    expect(openSpy).toHaveBeenCalledWith(`https://map.naver.com/v5/search/${'수내역 김밥천국'}`, '_blank');
+  });
+
+  it("should open a new tab with '<dongName> <storeName>' when dongName is provided", () => {
+    navigateToRestaurant('김밥천국', '정자동');
+
+    expect(openSpy).toHaveBeenCalledWith(`https://map.naver.com/v5/search/${'정자동 김밥천국'}`, '_blank');
   });
 });
