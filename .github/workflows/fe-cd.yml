@@ -42,15 +42,17 @@ jobs:
 
       - name: Add Fork Repository as Remote
         run: |
-          git remote set-url fork https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git
-          git fetch fork
+          git remote rename origin upstream
+          git remote add origin https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git
+          git fetch origin
+          git remote -v
 
       - name: Sync Fork with Upstream (Organization Repository)
         run: |
           git checkout dev
-          git merge --no-edit fork/dev
+          git pull upstream dev --rebase
+          git push origin dev
           git remote -v
-          git push https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
 
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
