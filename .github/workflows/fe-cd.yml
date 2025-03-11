@@ -14,7 +14,16 @@ on:
       - "front/**"
 
 jobs:
+  setup_git:
+    runs-on: ubuntu-latest # Ubuntu 환경에서 실행
+    steps:
+      - name: Set up Git credential helper for Ubuntu
+        run: |
+          git config --global credential.helper store
+          git config --global credential.useHttpPath true
+
   build:
+    needs: setup_git
     runs-on: ubuntu-latest
 
     steps:
