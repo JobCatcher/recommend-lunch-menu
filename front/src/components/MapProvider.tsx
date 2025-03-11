@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-// import Data from '../../data/data.json';
 import {KakaoMap, KakaoNamespace, Position} from '../types/kakao';
 import {RestaurantInfo} from '../types/restaurant';
 import {useAtom} from 'jotai';
