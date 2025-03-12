@@ -1,35 +1,26 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {DISTANCE, getDistanceFromLatLonInKm, isMobile, triggerEvent} from '../utils/utils';
-import {useAtom, useAtomValue} from 'jotai';
-import {clickedRestaurantAtom, restaurantMarkersAtom} from '../stores/restaurantAtom';
+import {DISTANCE, getDistanceFromLatLonInKm, isMobile, makeCustomOverlay} from '../utils/utils';
+import {useAtomValue} from 'jotai';
 import {mapAtom} from '../stores/mapAtom';
 import NoImage from '../../public/no-thumbnail.jpg';
+import {markerClickCallback} from '../services/kakaoMap';
 
 interface RestaurantProps {
   restaurant: RestaurantInfo;
   currentPosition?: {latitude: number; longitude: number};
 }
 
-const Restaurant = ({
-  restaurant: {restaurantId, title, category, reviewCount, rating, thumbnails, latitude, longitude},
-  currentPosition,
-}: RestaurantProps) => {
+const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
   const map = useAtomValue(mapAtom);
-  const {markers} = useAtomValue(restaurantMarkersAtom);
-  const [, setActiveRestaurant] = useAtom(clickedRestaurantAtom);
-
   const mobile = isMobile();
 
   const handleClickRestaurant = () => {
-    const mapMarker = markers.get(restaurantId);
-    const latlng = new window.kakao.maps.LatLng(latitude, longitude);
-    triggerEvent('click', mapMarker); // 인포윈도우 띄우기
-
-    setActiveRestaurant({activeRestaurantId: restaurantId});
-    map!.panTo(latlng);
-    map?.setLevel(4, {anchor: latlng});
+    const customOverlay = makeCustomOverlay(latitude, longitude, currentPosition!, {...restaurant});
+    markerClickCallback(map!, customOverlay, {...restaurant, latitude, longitude})();
   };
+
+  const {title, category, reviewCount, rating, thumbnails, latitude, longitude} = restaurant;
 
   return (
     <RestaurantContainer mobile={mobile} onClick={handleClickRestaurant}>
