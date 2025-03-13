@@ -57,14 +57,14 @@ jobs:
           git checkout dev
           git pull upstream dev --rebase
           git remote -v
-          git push https://lecto17:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
+          git push https://x-access-token:${{ secrets.FINAL_PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
 
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
         with:
           repository: lecto17/recommend-lunch-menu # 개인적으로 fork한 레포
           ref: dev
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.FINAL_PERSONAL_ACCESS_TOKEN }}
 
       - name: Install Vercel CLI
         run: npm install -g vercel
