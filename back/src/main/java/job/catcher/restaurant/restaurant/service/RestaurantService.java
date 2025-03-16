@@ -4,7 +4,9 @@ import job.catcher.restaurant.global.response.RestaurantCrawlingDto;
 import job.catcher.restaurant.global.util.GeoHashUtil;
 import job.catcher.restaurant.restaurant.domain.Category;
 import job.catcher.restaurant.restaurant.domain.Restaurant;
+import job.catcher.restaurant.restaurant.dto.RestaurantRequestDto;
 import job.catcher.restaurant.restaurant.dto.RestaurantResponseDto;
+import job.catcher.restaurant.restaurant.dto.RestaurantSyncResponseDto;
 import job.catcher.restaurant.restaurant.repository.RestaurantRepository;
 import job.catcher.restaurant.restaurant.repository.RestaurantRepositoryJooq;
 import job.catcher.restaurant.thumbnail.domain.Thumbnail;
@@ -51,9 +53,22 @@ public class RestaurantService {
         return restaurantRepository.findRestaurantInRangeV2(geoHashs);
     }
 
-    public List<RestaurantResponseDto> searchRestaurantV3(double latitude, double longitude) {
+    public List<RestaurantResponseDto> searchRestaurantV3Get(double latitude, double longitude) {
         List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
         return restaurantRepositoryJooq.findRestaurantInRangeV3(geoHashs);
+    }
+
+    public RestaurantSyncResponseDto searchRestaurantV3Post(double latitude, double longitude, RestaurantRequestDto restaurantRequestDto) {
+        List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
+        List<RestaurantResponseDto> restaurants = restaurantRepositoryJooq.findRestaurantInRangeV3(geoHashs);
+        List<Long> restaurantIds = restaurantRequestDto.restaurantIds();
+
+        List<Long> removeRestaurantIds = restaurantIds.stream()
+                .filter(id -> restaurants.stream().noneMatch(r -> r.restaurantId() == id))
+                .collect(Collectors.toList());
+        restaurants.removeIf(restaurant -> restaurantIds.contains(restaurant.restaurantId()));
+
+        return RestaurantSyncResponseDto.from(restaurants, removeRestaurantIds);
     }
 
     public List<RestaurantResponseDto> findAll() {
