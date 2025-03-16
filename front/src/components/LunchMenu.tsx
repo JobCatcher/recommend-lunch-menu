@@ -54,5 +54,5 @@ const LunchMenuWrapper = styled.ul<{noContents: boolean}>`
   @media screen and (max-width: 1400px) {
     grid-template-columns: repeat(1, 1fr);
   }
-  ${({noContents}) => (noContents ? `display: flex; min-width: 500px; justify-content: center;` : '')}
+  ${({noContents}) => noContents && `display: flex; min-width: 500px; justify-content: center;`}
 `;

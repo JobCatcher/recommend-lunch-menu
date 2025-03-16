@@ -1,4 +1,11 @@
-import {KakaoMap, KakaoMarker} from '../types/kakao';
+import {getDefaultStore} from 'jotai';
+import {KakaoMap, KakaoMarker, Position} from '../types/kakao';
+import {markerAtom} from '../stores/mapAtom';
+import RestaurantOverlay from '../components/RestaurantOverlay';
+import ReactDOMServer from 'react-dom/server';
+import React from 'react';
+import {RestaurantInfo} from '../types/restaurant';
+import {markerClickCallback} from '../services/kakaoMap';
 
 /**
  * 1 - km
@@ -6,22 +13,9 @@ import {KakaoMap, KakaoMarker} from '../types/kakao';
  */
 export const DISTANCE = 1000;
 
-export const getNumbers = (text: unknown) => {
-  if (typeof text === 'string') {
-    // 정규식을 사용하여 숫자 패턴(쉼표 포함)을 모두 추출
-    const numbers = text.match(/\d{1,10}(,\d{10})*(\.\d+)?/g);
-    return numbers;
-  }
-  return '';
-};
-
 export const navigateToRestaurant = (storeName: string, dongName?: string) => {
   const name = dongName ? `${dongName} ${storeName}` : `수내역 ${storeName}`;
 
-  // window.open(
-  //   `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=${name}`,
-  //   "_blank"
-  // );
   window.open(`https://map.naver.com/v5/search/${name}`, '_blank');
 };
 
@@ -56,6 +50,8 @@ export const setActiveMarker = (map: KakaoMap, activeMarkerAtom: KakaoMarker, la
     activeMarkerAtom.setMap(null);
   }
 
+  const store = getDefaultStore();
+
   const imageSrc = '/active.png';
   const imageSize = new window.kakao.maps.Size(28, 38);
   const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
@@ -67,6 +63,7 @@ export const setActiveMarker = (map: KakaoMap, activeMarkerAtom: KakaoMarker, la
   });
 
   marker.setMap(map);
+  store.set(markerAtom, marker);
   return marker;
 };
 
@@ -92,4 +89,36 @@ export const getDistanceFromLatLonInKm = (lat1: number, lng1: number, lat2: numb
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const d = R * c; // Distance in km
   return d.toFixed(2);
+};
+
+export const makeCustomOverlay = (
+  latitude: number,
+  longitude: number,
+  currentPosition: Position,
+  rest: Omit<RestaurantInfo, 'latitude' | 'longitude'>,
+) => {
+  return new window.kakao.maps.CustomOverlay({
+    position: new window.kakao.maps.LatLng(latitude + 0.00045, longitude - 0.00045), // 마커를 표시할 위치
+    content: `${ReactDOMServer.renderToString(
+      React.createElement(RestaurantOverlay, {restaurant: {...rest, latitude, longitude}, currentPosition}),
+    )}`,
+    xAnchor: 0.3,
+    yAnchor: 0.91,
+  });
+};
+
+export const initializeMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInfo[], currentPosition: Position) => {
+  return restaurants.map(({latitude, longitude, ...rest}) => {
+    const marker = new window.kakao.maps.Marker({
+      position: new window.kakao.maps.LatLng(latitude, longitude),
+    });
+
+    const customOverlay = makeCustomOverlay(latitude, longitude, currentPosition, rest);
+
+    window.kakao.maps.event.addListener(marker, 'click', () => {
+      markerClickCallback(map, customOverlay, {...rest, latitude, longitude})();
+    });
+
+    return marker;
+  });
 };

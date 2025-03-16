@@ -3,6 +3,10 @@
 
 name: CI/CD with GitHub Actions
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   push:
     branches: ["master", "dev"]
@@ -10,55 +14,102 @@ on:
       - "front/**"
 
 jobs:
+  setup_git:
+    runs-on: ubuntu-latest # Ubuntu 환경에서 실행
+    steps:
+      - name: Set up Git credential helper for Ubuntu
+        run: |
+          git config --global credential.helper store
+          git config --global credential.useHttpPath true
+
   build:
+    needs: setup_git
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code (only front/)
+      - name: Checkout Organization Repository  (only front/)
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+          repository: JobCatcher/recommend-lunch-menu # Organization의 원본 레포
           sparse-checkout: |
             front
-          sparse-checkout-cone-mode: false
 
-      - name: Setup node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.x
-          cache: npm
-          cache-dependency-path: front/package-lock.json
+      - name: Configure Git for Syncing Fork
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Install dependencies
-        run: npm ci
-        working-directory: front
+      - name: Debug GitHub Token
+        run: |
+          echo "Checking if PAT is available..."
+          echo "Token length: ${{secrets.PERSONAL_ACCESS_TOKEN}}"
 
-      - name: Build the project
-        run: npm run build
-        working-directory: front
+      - name: Add Fork Repository as Remote
+        run: |
+          git remote rename origin upstream
+          git remote add origin https://github.com/lecto17/recommend-lunch-menu.git
+          git fetch origin
+          git remote -v
 
-  Deploy-Preview:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source code
+      - name: Sync Fork with Upstream (Organization Repository)
+        run: |
+          git checkout dev
+          git pull upstream dev --rebase
+          git remote -v
+          git push https://x-access-token:${{ secrets.LATEST_PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
+
+      - name: Checkout Fork Repository
         uses: actions/checkout@v4
         with:
-          sparse-checkout: |
-            front
-          sparse-checkout-cone-mode: false
+          repository: lecto17/recommend-lunch-menu # 개인적으로 fork한 레포
+          ref: dev
+          token: ${{ secrets.LATEST_PERSONAL_ACCESS_TOKEN }}
 
       - name: Install Vercel CLI
-        run: npm install -g vercel@latest
-        working-directory: front
+        run: npm install -g vercel
 
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: front
+      - name: Deploy to Vercel
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: front
+  #     - name: Setup node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 18.x
+  #         cache: npm
+  #         cache-dependency-path: front/package-lock.json
 
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-        working-directory: front
+  #     - name: Install dependencies
+  #       run: npm ci
+  #       working-directory: front
+
+  #     - name: Build the project
+  #       run: npm run build
+  #       working-directory: front
+
+  # Deploy-Preview:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         sparse-checkout: |
+  #           front
+  #         sparse-checkout-cone-mode: false
+
+  #     - name: Install Vercel CLI
+  #       run: npm install -g vercel@latest
+  #       working-directory: front
+
+  #     - name: Pull Vercel Environment Information
+  #       run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+  #       working-directory: front
+
+  #     - name: Build Project Artifacts
+  #       run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+  #       working-directory: front
+
+  #     - name: Deploy Project Artifacts to Vercel
+  #       run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+  #       working-directory: front
