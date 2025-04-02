@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, RestaurantRepositoryCustom {
 
@@ -17,4 +18,8 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, R
 
     @Query("SELECT r FROM Restaurant r WHERE r.googleId IN :googleIds")
     List<Restaurant> findByGoogleIdIn(List<String> googleIds);
+
+    Optional<Restaurant> findByGoogleId(String googleId);
+
+    List<Restaurant> findAllByGoogleIdIn(List<String> googleIds);
 }
