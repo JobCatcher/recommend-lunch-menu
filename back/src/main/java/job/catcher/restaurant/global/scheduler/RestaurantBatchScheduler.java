@@ -32,7 +32,7 @@ public class RestaurantBatchScheduler {
         this.redisTemplate = redisTemplate;
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+//    @Scheduled(cron = "0 0 0 * * *")
     public void runJob() {
 
         Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(LOCK_KEY, LOCK_VALUE, LOCK_EXPIRATION);
