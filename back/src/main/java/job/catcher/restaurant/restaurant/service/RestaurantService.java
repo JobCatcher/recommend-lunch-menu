@@ -13,6 +13,9 @@ import job.catcher.restaurant.thumbnail.domain.Thumbnail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -115,18 +118,7 @@ public class RestaurantService {
                 restaurant.updateCrawlingData(dto.title(), dto.address(), dto.rating(), dto.reviewCount(), dto.visitedReviewCount());
             } else {
                 // 기존 데이터 없음 -> 신규 삽입 대상
-                Restaurant newRestaurant = Restaurant.builder()
-                        .googleId(dto.googleId())
-                        .title(dto.title())
-                        .address(dto.address())
-                        .latitude(dto.latitude())
-                        .longitude(dto.longitude())
-                        .geoHash(GeoHashUtil.encode(dto.latitude(), dto.longitude(), 6))
-                        .rating(dto.rating() != null ? dto.rating() : 0.0)
-                        .reviewCount(dto.reviewCount() != null ? dto.reviewCount() : 0)
-                        .visitedReviewCount(dto.visitedReviewCount() != null ? dto.visitedReviewCount() : 0)
-                        .category(Category.KOREA)
-                        .build();
+                Restaurant newRestaurant = dto.toEntity();
                 toInsert.add(newRestaurant);
             }
         }
@@ -134,6 +126,59 @@ public class RestaurantService {
         // 5. Batch Insert 실행
         if (!toInsert.isEmpty()) {
             restaurantRepository.saveAll(toInsert);
+        }
+    }
+
+//    @Transactional
+//    public void saveOrUpdateAsync(List<RestaurantCrawlingDto> dtos) {
+//        Flux.fromIterable(dtos)
+//                .parallel()
+//                .runOn(Schedulers.boundedElastic()) // 병렬 처리
+//                .flatMap(dto -> Mono.fromCallable(() -> saveOrUpdate(dto)))
+//                .sequential()
+//                .subscribe();
+//    }
+//
+//    private Restaurant saveOrUpdate(RestaurantCrawlingDto dto) {
+//        return restaurantRepository.findByGoogleId(dto.googleId())
+//                .map(restaurant -> {
+//                    restaurant.updateCrawlingData(dto.title(), dto.address(), dto.rating(), dto.reviewCount(), dto.visitedReviewCount());
+//                    return restaurant;
+//                })
+//                .orElseGet(() -> {
+//                    Restaurant newRestaurant = dto.toEntity();
+//                    return restaurantRepository.save(newRestaurant);
+//                });
+//    }
+
+    @Transactional
+    public void saveOrUpdateAsync(List<RestaurantCrawlingDto> dtos) {
+        // 1. DB에서 googleId를 IN절로 조회
+        List<String> googleIds = dtos.stream()
+                .map(RestaurantCrawlingDto::googleId)
+                .toList();
+        List<Restaurant> existingRestaurants = restaurantRepository.findAllByGoogleIdIn(googleIds);
+
+        // 2. Map<googleId, Restaurant> 형태로 변환
+        Map<String, Restaurant> restaurantMap = existingRestaurants.stream()
+                .collect(Collectors.toMap(Restaurant::getGoogleId, r -> r));
+
+        // 3. 병렬로 저장 및 수정
+        Flux.fromIterable(dtos)
+                .parallel(4)
+                .runOn(Schedulers.boundedElastic())
+                .flatMap(dto -> Mono.fromCallable(() -> saveOrUpdate(restaurantMap, dto)))
+                .sequential()
+                .subscribe();
+    }
+
+    private Restaurant saveOrUpdate(Map<String, Restaurant> restaurantMap, RestaurantCrawlingDto dto) {
+        if (restaurantMap.containsKey(dto.googleId())) {
+            Restaurant restaurant = restaurantMap.get(dto.googleId());
+            restaurant.updateCrawlingData(dto.title(), dto.address(), dto.rating(), dto.reviewCount(), dto.visitedReviewCount());
+            return restaurant;
+        } else {
+            return restaurantRepository.save(dto.toEntity());
         }
     }
 }
