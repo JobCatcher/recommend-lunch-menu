@@ -25,7 +25,8 @@ public class RestaurantAsyncScheduler {
     private final RestaurantService restaurantService;
 
 //    @Scheduled(fixedRate = 60000)
-    @Scheduled(cron = "0 0 0 * * *")
+//    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 */5 * * * *")
     public void asyncCrawling() {
 
         Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(LOCK_KEY, LOCK_VALUE, LOCK_EXPIRATION);
