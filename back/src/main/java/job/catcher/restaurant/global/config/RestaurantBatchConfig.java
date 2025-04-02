@@ -56,10 +56,9 @@ public class RestaurantBatchConfig {
 
     @Bean
     public Tasklet crawlTasklet() {
-        System.out.println("//=== crawlTasklet ===//");
         return (contribution, chunkContext) -> {
             // 크롤링 로직 (HTTP GET 요청)
-            List<RestaurantCrawlingDto> restaurantCrawlingDtos = fetchRestaurantData();
+            List<RestaurantCrawlingDto> restaurantCrawlingDtos = fetchRestaurantData(37.378937695744746, 127.11387857445837);
             // Step 간 데이터를 공유하기 위해 ExecutionContext에 저장
             chunkContext.getStepContext().getStepExecution().getJobExecution()
                     .getExecutionContext()
@@ -73,7 +72,6 @@ public class RestaurantBatchConfig {
 
     @Bean
     public Tasklet saveTasklet() {
-        System.out.println("//=== saveTasklet ===//");
         return (contribution, chunkContext) -> {
             // ExecutionContext에서 데이터 꺼내기
             List<RestaurantCrawlingDto> restaurantCrawlingDtos =
@@ -92,9 +90,7 @@ public class RestaurantBatchConfig {
         };
     }
 
-    private List<RestaurantCrawlingDto> fetchRestaurantData() {
-        double latitude = 37.378937695744746;
-        double longitude = 127.11387857445837;
+    private List<RestaurantCrawlingDto> fetchRestaurantData(double latitude, double longitude) {
         // HTTP GET 요청 처리 (WebClient 사용)
         // 데이터를 RestaurantDto List로 반환
         return crawlingService.fetchRestaurantData(latitude, longitude)
