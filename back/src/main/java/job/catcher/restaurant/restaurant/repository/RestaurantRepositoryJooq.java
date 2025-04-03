@@ -121,4 +121,63 @@ public class RestaurantRepositoryJooq {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
+
+    public List<Long> findByGeoHashIncludingIds(List<String> geoHashs, List<Long> restaurantIds) {
+        var r = table("restaurant").as("r");
+
+        return dsl.select(field("r.id", Long.class))
+                .from(r)
+                .where(field("r.geo_hash").in(geoHashs)
+                        .and(field("r.id").in(restaurantIds)))
+                .fetchInto(Long.class);
+    }
+
+    public List<RestaurantResponseDto> findByGeoHashExcludingIds(List<String> geoHashs, List<Long> restaurantIds) {
+        var r = table("restaurant").as("r");
+        var t = table("thumbnail").as("t");
+
+        return dsl.select(
+                        field("r.id", Long.class).as("restaurantId"),
+                        field("r.title", String.class),
+                        field("r.latitude", Double.class),
+                        field("r.longitude", Double.class),
+                        field("r.rating", Double.class),
+                        field("r.review_count", Integer.class),
+                        field("t.id", Long.class).as("thumbnailId"),
+                        field("t.url", String.class).as("url")
+                )
+                .from(r)
+                .leftJoin(t)
+                .on(field("t.record_id").eq(field("r.id"))
+                        .and(field("t.table_name").eq("RESTAURANT")))
+                .where(field("r.geo_hash").in(geoHashs)
+                        .and(field("r.id").notIn(restaurantIds)))
+                .orderBy(field("r.id").asc(), field("t.id").asc())
+                .fetchGroups(
+                        record -> new RestaurantResponseDto(
+                                record.get("restaurantId", Long.class),
+                                record.get("r.title", String.class),
+                                record.get("r.latitude", Double.class),
+                                record.get("r.longitude", Double.class),
+                                record.get("r.rating", Double.class),
+                                record.get("r.review_count", Integer.class),
+                                new ArrayList<>()
+                        ),
+                        record -> new RestaurantResponseDto.ThumbnailResponseDto(
+                                record.get("thumbnailId", Long.class) != null
+                                        ? record.get("thumbnailId", Long.class)
+                                        : 0L,
+                                record.get("url", String.class)
+                        )
+                )
+                .entrySet()
+                .stream()
+                .peek(entry -> {
+                    List<RestaurantResponseDto.ThumbnailResponseDto> thumbnails = entry.getValue();
+                    thumbnails = (thumbnails.size() == 1 && thumbnails.get(0).thumbnailId() == 0L) ? new ArrayList<>() : thumbnails;
+                    entry.getKey().thumbnails().addAll(thumbnails);
+                })
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+    }
 }
