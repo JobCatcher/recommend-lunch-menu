@@ -187,8 +187,6 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       // 최초에는 위,경도가 0으로 이 경우에는 호출 x
       if (!latitude && !longitude && zoomLevel === DEFAULT_ZOOM_LEVEL) return;
 
-      console.log('여긴 나옴');
-
       await getRestaurants().then(res => {
         setRestaurants(res);
         setRestaurantsAtom({restaurants: res});
@@ -215,5 +213,4 @@ export default MapProvider;
 
 const MapContainer = styled.div`
   width: 100%;
-  padding: 0 20px;
 `;
