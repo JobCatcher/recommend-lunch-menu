@@ -23,7 +23,7 @@ const LunchMenu = () => {
   };
 
   return (
-    <LunchMenuContainer className="lunch-container">
+    <LunchMenuContainer mobile={mobile} className="lunch-container">
       <StyledText>추천 메뉴</StyledText>
       <ScrollWrapper>
         <LunchMenuWrapper mobile={mobile} noContents={!restaurants.length}>
@@ -36,8 +36,8 @@ const LunchMenu = () => {
 
 export default LunchMenu;
 
-const LunchMenuContainer = styled.div`
-  width: 100%;
+const LunchMenuContainer = styled.div<{mobile: boolean}>`
+  ${props => props.mobile && 'width: 100%;'}
   display: flex;
   flex-direction: column;
   align-items: center;
