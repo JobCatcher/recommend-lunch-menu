@@ -3,9 +3,11 @@ import styled from '@emotion/styled';
 import Restaurant from './Restaurant';
 import {useAtomValue} from 'jotai';
 import {restaurantsAtom} from '../stores/restaurantAtom';
+import {isMobile} from '../utils/utils';
 
 const LunchMenu = () => {
   const {restaurants} = useAtomValue(restaurantsAtom);
+  const mobile = isMobile();
 
   const getContents = () => {
     if (!restaurants.length) {
@@ -23,7 +25,9 @@ const LunchMenu = () => {
   return (
     <LunchMenuContainer>
       <StyledText>추천 메뉴</StyledText>
-      <LunchMenuWrapper noContents={!restaurants.length}>{getContents()}</LunchMenuWrapper>
+      <LunchMenuWrapper mobile={mobile} noContents={!restaurants.length}>
+        {getContents()}
+      </LunchMenuWrapper>
     </LunchMenuContainer>
   );
 };
@@ -34,7 +38,7 @@ const LunchMenuContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 800px;
+  max-height: 800px;
   overflow: scroll;
   padding: 0 12px;
 `;
@@ -45,9 +49,10 @@ const StyledText = styled.h2`
   margin: 16px 0;
 `;
 
-const LunchMenuWrapper = styled.ul<{noContents: boolean}>`
+const LunchMenuWrapper = styled.ul<{mobile: boolean; noContents: boolean}>`
   padding: 0 20px;
-  display: grid;
+  display: ${props => (props.mobile ? 'flex' : 'grid')};
+  ${props => props.mobile && 'overflow-x: scroll; white-space: nowrap;'}
   grid-template-columns: repeat(2, 1fr);
   gap: 8px 16px;
   place-items: center;
