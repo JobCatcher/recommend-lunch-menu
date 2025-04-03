@@ -76,7 +76,6 @@ const RestaurantContainer = styled.li<{mobile: boolean}>`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
   cursor: pointer;
-  overflow: hidden;
 `;
 
 const ImageContainer = styled.div`

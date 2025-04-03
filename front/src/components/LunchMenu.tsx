@@ -23,11 +23,13 @@ const LunchMenu = () => {
   };
 
   return (
-    <LunchMenuContainer>
+    <LunchMenuContainer className="lunch-container">
       <StyledText>추천 메뉴</StyledText>
-      <LunchMenuWrapper mobile={mobile} noContents={!restaurants.length}>
-        {getContents()}
-      </LunchMenuWrapper>
+      <ScrollWrapper>
+        <LunchMenuWrapper mobile={mobile} noContents={!restaurants.length}>
+          {getContents()}
+        </LunchMenuWrapper>
+      </ScrollWrapper>
     </LunchMenuContainer>
   );
 };
@@ -35,11 +37,12 @@ const LunchMenu = () => {
 export default LunchMenu;
 
 const LunchMenuContainer = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   max-height: 800px;
-  overflow: scroll;
+  overflow-x: hidden;
   padding: 0 12px;
 `;
 
@@ -52,12 +55,21 @@ const StyledText = styled.h2`
 const LunchMenuWrapper = styled.ul<{mobile: boolean; noContents: boolean}>`
   padding: 0 20px;
   display: ${props => (props.mobile ? 'flex' : 'grid')};
-  ${props => props.mobile && 'overflow-x: scroll; white-space: nowrap;'}
-  grid-template-columns: repeat(2, 1fr);
+  ${props =>
+    props.mobile
+      ? 'overflow-x: scroll; white-space: nowrap; width: max-content;'
+      : 'grid-template-columns: repeat(2, 1fr);'}
   gap: 8px 16px;
   place-items: center;
   @media screen and (max-width: 1400px) {
     grid-template-columns: repeat(1, 1fr);
   }
   ${({noContents}) => noContents && `display: flex; min-width: 500px; justify-content: center;`}
+`;
+
+const ScrollWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
 `;
