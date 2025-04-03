@@ -176,6 +176,8 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
 
       await getRestaurants(latitude, longitude);
       await initializeMap(latitude, longitude);
+      // await getRestaurants(37.3727, 127.1229);
+      // await initializeMap(37.3727, 127.1229);
       setUserAccessPosition({latitude, longitude});
     });
   }, []);
