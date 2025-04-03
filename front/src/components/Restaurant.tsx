@@ -82,7 +82,6 @@ const ImageContainer = styled.div`
   display: flex;
   margin-bottom: 12px;
   width: 100%;
-  overflow-x: scroll;
 
   img {
     width: 150px;
