@@ -61,15 +61,28 @@ public class RestaurantService {
         return restaurantRepositoryJooq.findRestaurantInRangeV3(geoHashs);
     }
 
+//    public RestaurantSyncResponseDto searchRestaurantV3Post(double latitude, double longitude, RestaurantRequestDto restaurantRequestDto) {
+//        List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
+//        List<RestaurantResponseDto> restaurants = restaurantRepositoryJooq.findRestaurantInRangeV3(geoHashs);
+//        List<Long> restaurantIds = restaurantRequestDto.restaurantIds();
+//
+//        List<Long> removeRestaurantIds = restaurantIds.stream()
+//                .filter(id -> restaurants.stream().noneMatch(r -> r.restaurantId() == id))
+//                .collect(Collectors.toList());
+//        restaurants.removeIf(restaurant -> restaurantIds.contains(restaurant.restaurantId()));
+//
+//        return RestaurantSyncResponseDto.from(restaurants, removeRestaurantIds);
+//    }
+
     public RestaurantSyncResponseDto searchRestaurantV3Post(double latitude, double longitude, RestaurantRequestDto restaurantRequestDto) {
         List<String> geoHashs = GeoHashUtil.getNeighbors(latitude, longitude, 6);
-        List<RestaurantResponseDto> restaurants = restaurantRepositoryJooq.findRestaurantInRangeV3(geoHashs);
         List<Long> restaurantIds = restaurantRequestDto.restaurantIds();
 
+        List<RestaurantResponseDto> restaurants = restaurantRepositoryJooq.findByGeoHashExcludingIds(geoHashs, restaurantIds);
+        List<Long> includingRestaurantIds = restaurantRepositoryJooq.findByGeoHashIncludingIds(geoHashs, restaurantIds);
         List<Long> removeRestaurantIds = restaurantIds.stream()
-                .filter(id -> restaurants.stream().noneMatch(r -> r.restaurantId() == id))
+                .filter(id -> includingRestaurantIds.stream().noneMatch(r -> Objects.equals(r, id)))
                 .collect(Collectors.toList());
-        restaurants.removeIf(restaurant -> restaurantIds.contains(restaurant.restaurantId()));
 
         return RestaurantSyncResponseDto.from(restaurants, removeRestaurantIds);
     }
