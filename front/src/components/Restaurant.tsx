@@ -63,9 +63,9 @@ const Title = styled.h3<{mobile: boolean}>`
 `;
 
 const RestaurantContainer = styled.li<{mobile: boolean}>`
-  max-width: ${props => (props.mobile ? '150px' : '230px')};
-  width: ${props => (props.mobile ? '150px' : '230px')};
-  display: flex;
+  max-width: ${props => (props.mobile ? '150px' : '200px')};
+  width: ${props => (props.mobile ? '150px' : '200px')};
+  display: ${props => (props.mobile ? 'grid' : 'flex')};
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
@@ -76,14 +76,12 @@ const RestaurantContainer = styled.li<{mobile: boolean}>`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
   cursor: pointer;
-  overflow: hidden;
 `;
 
 const ImageContainer = styled.div`
   display: flex;
   margin-bottom: 12px;
   width: 100%;
-  overflow-x: scroll;
 
   img {
     width: 150px;
