@@ -21,7 +21,9 @@ const GlobalNav = ({setState}: Props) => {
     const value = e.currentTarget.getAttribute('value') as keyof Menu;
 
     setState(prev => {
-      if (prev?.[value]) return {...prev, value: !prev[value]};
+      if (prev?.[value] !== undefined) {
+        return {...prev, [value]: !prev[value]};
+      }
       return {...prev, drawLots: !prev['drawLots']};
     });
   };
