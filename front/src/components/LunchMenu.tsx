@@ -43,7 +43,7 @@ const LunchMenuContainer = styled.div<{mobile: boolean}>`
   align-items: center;
   max-height: 800px;
   overflow-x: hidden;
-  padding: 0 12px;
+  ${props => !props.mobile && 'padding: 0 12px;'}
 `;
 
 const StyledText = styled.h2`
