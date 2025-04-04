@@ -2,8 +2,6 @@ import {describe, expect, it} from 'vitest';
 import {vi} from 'vitest';
 import Home from './Home';
 import {render} from '@testing-library/react';
-import {useContext, useState} from 'react';
-import {GloablContext} from '../context/GlobalNavContext';
 
 // isMobile을 모킹해서 모바일과 데스크탑 환경을 시뮬레이션
 vi.mock('../utils/utils', () => ({
@@ -12,9 +10,8 @@ vi.mock('../utils/utils', () => ({
 
 describe('Home component', () => {
   it('renders the main title', () => {
-    const globalContext = useContext(GloablContext);
-    const [, setState] = useState(globalContext);
-    const {container} = render(<Home setState={setState} />);
+    const mockSetState = vi.fn();
+    const {container} = render(<Home setState={mockSetState} />);
     const mainTitle = container.querySelector('h1');
     expect(mainTitle).not.toBeNull();
     expect(mainTitle?.textContent).toBe('오늘의 점심');
