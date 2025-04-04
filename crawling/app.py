@@ -90,10 +90,15 @@ async def scrape_data(url: str):
                 visitor_review_count = answer[0] if len(answer) > 0 else ""
                 blog_review_count = answer[1] if len(answer) > 1 else ""
 
+            # class가 ["fNygA", "BkqXt"]인 div 태그 찾기
+            divs = soup.find_all("div", class_=["fNygA", "BkqXt"])
+            img_urls = [div.find("img")["src"] for div in divs if div.find("img")]
+
             return {
                 'rating': extract_numbers(star_rating)[0] if isinstance(extract_numbers(star_rating), list) and extract_numbers(star_rating) else 0,
                 'visitedReviewCount': extract_numbers(visitor_review_count)[0] if isinstance(extract_numbers(visitor_review_count), list) and extract_numbers(visitor_review_count) else 0,
-                'reviewCount': extract_numbers(blog_review_count)[0] if isinstance(extract_numbers(blog_review_count), list) and extract_numbers(blog_review_count) else 0
+                'reviewCount': extract_numbers(blog_review_count)[0] if isinstance(extract_numbers(blog_review_count), list) and extract_numbers(blog_review_count) else 0,
+                'images': img_urls
             }
 
 def get_queryUrl(query: str) -> str:
