@@ -49,6 +49,7 @@ const Ul = styled.ul`
   & :not(:last-child) {
     margin-right: 16px;
   }
+  box-sizing: border-box;
 `;
 
 const Li = styled.li`
