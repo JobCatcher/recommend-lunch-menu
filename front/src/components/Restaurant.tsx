@@ -33,7 +33,7 @@ const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
           <EmptyImage src={NoImage} alt={`${title} 이미지`} />
         )}
       </ImageContainer>
-      <InfoContainer>
+      <InfoContainer mobile={mobile}>
         <Title mobile={mobile}>{title} </Title>
         <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
@@ -63,8 +63,8 @@ const Title = styled.h3<{mobile: boolean}>`
 `;
 
 const RestaurantContainer = styled.li<{mobile: boolean}>`
-  max-width: ${props => (props.mobile ? '150px' : '200px')};
-  width: ${props => (props.mobile ? '150px' : '200px')};
+  max-width: ${props => (props.mobile ? '170px' : '200px')};
+  width: ${props => (props.mobile ? '170px' : '200px')};
   display: ${props => (props.mobile ? 'grid' : 'flex')};
   flex-direction: column;
   align-items: flex-start;
@@ -92,8 +92,8 @@ const ImageContainer = styled.div`
   }
 `;
 
-const InfoContainer = styled.div`
-  margin-left: 15px;
+const InfoContainer = styled.div<{mobile: boolean}>`
+  ${props => !props.mobile && 'margin-left: 15px;'}
   display: flex;
   flex-direction: column;
 `;
