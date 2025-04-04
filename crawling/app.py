@@ -72,7 +72,6 @@ async def scrape_data(url: str):
             for tag in span_tags:
                 # 예시: 특정 클래스가 있으면 평점 정보를 추출
                 if 'LXIwF' in tag.get('class', []):
-                    print('has rating')
                     answer.append(tag.text)
                 else:
                     # 링크 안의 텍스트 추출 (실제 로직은 페이지 구조에 따라 조정)
@@ -115,7 +114,7 @@ async def get_restaurants(latitude: float = Query(...), longitude: float = Query
         location = place.get("location", {})
 
         # 음식점 주소와 상호명을 결합하여 네이버 검색 URL 생성
-        formatted_url = get_queryUrl(formatted_address + " " + name)
+        formatted_url = get_queryUrl(name)
         scraped_info = await scrape_data(formatted_url)
         enriched_info = {
             **scraped_info,
