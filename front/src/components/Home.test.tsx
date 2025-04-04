@@ -10,7 +10,8 @@ vi.mock('../utils/utils', () => ({
 
 describe('Home component', () => {
   it('renders the main title', () => {
-    const {container} = render(<Home />);
+    const mockSetState = vi.fn();
+    const {container} = render(<Home setState={mockSetState} />);
     const mainTitle = container.querySelector('h1');
     expect(mainTitle).not.toBeNull();
     expect(mainTitle?.textContent).toBe('오늘의 점심');
