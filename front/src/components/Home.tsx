@@ -1,10 +1,18 @@
 import styled from '@emotion/styled';
 import LunchMenu from './LunchMenu';
 import {isMobile} from '../utils/utils';
-import React from 'react';
+import React, {useContext} from 'react';
+import {GloablContext, Menu} from '../context/GlobalNavContext';
+import DrawLots from './draw-lots/DrawLots';
+import Chatting from './chatting/Chatting';
 
-const Home = React.forwardRef<HTMLDivElement>((_, mapRef) => {
+type Props = {
+  setState: React.Dispatch<React.SetStateAction<Menu>>;
+};
+
+const Home = React.forwardRef<HTMLDivElement, Props>(({setState}, mapRef) => {
   const mobile = isMobile();
+  const menu = useContext(GloablContext);
 
   const width = mobile ? '300px' : '1100px';
   const height = mobile ? '400px' : '800px';
@@ -16,6 +24,8 @@ const Home = React.forwardRef<HTMLDivElement>((_, mapRef) => {
         <LunchMenu />
         <div id="map" ref={mapRef} style={{width, height}} />
       </Flex>
+      {menu.drawLots && <DrawLots setState={setState} />}
+      {menu.chatting && <Chatting setState={setState} />}
     </HomeContainer>
   );
 });
