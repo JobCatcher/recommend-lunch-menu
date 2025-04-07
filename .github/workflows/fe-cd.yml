@@ -3,10 +3,6 @@
 
 name: CI/CD with GitHub Actions
 
-permissions:
-  contents: write
-  pull-requests: write
-
 on:
   push:
     branches: ["master", "dev"]
@@ -27,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Organization Repository  (only front/)
+      - name: Checkout Organization Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -53,13 +49,8 @@ jobs:
       - name: Sync Fork with Upstream (Organization Repository)
         run: |
           git checkout -B dev upstream/dev
+          git remote -v
           git push origin dev --force
-
-      #          git checkout dev
-      #          git pull upstream dev --rebase
-      #          git remote -v
-      #          git push https://x-access-token:${{ secrets.LATEST_PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
-      #          git push https://lecto17:${{ secrets.LATEST_PERSONAL_ACCESS_TO/KEN }}@github.com/lecto17/recommend-lunch-menu.git dev
 
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
