@@ -9,5 +9,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
       // thresholds: {},
     },
+    globals: true,
+    setupFiles: ['./setupTests.ts'],
   },
 });
