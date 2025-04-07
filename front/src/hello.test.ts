@@ -9,5 +9,5 @@ test('1 + 1 is 2', () => {
 });
 
 test('1 - 1 is 0', () => {
-  expect(0).not.toBe(1);
+  expect(0).not.toBe(4);
 });
