@@ -32,8 +32,6 @@ jobs:
         with:
           fetch-depth: 0
           repository: JobCatcher/recommend-lunch-menu # Organization의 원본 레포
-          sparse-checkout: |
-            front
 
       - name: Configure Git for Syncing Fork
         run: |
