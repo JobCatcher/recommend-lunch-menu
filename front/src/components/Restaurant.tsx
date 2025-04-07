@@ -65,7 +65,7 @@ const Title = styled.h3<{mobile: boolean}>`
 const RestaurantContainer = styled.li<{mobile: boolean}>`
   max-width: ${props => (props.mobile ? '170px' : '200px')};
   width: ${props => (props.mobile ? '170px' : '200px')};
-  display: ${props => (props.mobile ? 'grid' : 'flex')};
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
