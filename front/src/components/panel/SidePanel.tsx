@@ -14,7 +14,7 @@ const SidePanel = ({children, onClick}: Props) => {
   return (
     <Container>
       <Div>
-        <CloseButton onClick={handleClick} />
+        <CloseButton onClick={handleClick} role="img" />
         {children}
       </Div>
     </Container>
