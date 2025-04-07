@@ -23,5 +23,5 @@
     "noUncheckedSideEffectImports": true,
     "types": ["./node_modules/user-agent-data-types"]
   },
-  "include": ["src"]
+  "include": ["src", "vitest.d.ts"]
 }
