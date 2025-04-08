@@ -107,6 +107,13 @@ export const makeCustomOverlay = (
   });
 };
 
+/**
+ * map에 clusterer로 들어갈 restaurant marker 및 marker 클릭 시 띄워질 Overlay 생성.
+ * @param map
+ * @param restaurants
+ * @param currentPosition
+ * @returns
+ */
 export const initializeMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInfo[], currentPosition: Position) => {
   return restaurants.map(({latitude, longitude, ...rest}) => {
     const marker = new window.kakao.maps.Marker({
@@ -119,6 +126,6 @@ export const initializeMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInf
       markerClickCallback(map, customOverlay, {...rest, latitude, longitude})();
     });
 
-    return marker;
+    return {restaurantId: rest.restaurantId, marker};
   });
 };
