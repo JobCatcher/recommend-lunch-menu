@@ -1,3 +1,5 @@
+import {KakaoMarker} from './kakao';
+
 interface ReviewAndRating {
   별점?: string;
   방문자리뷰?: string;
@@ -15,3 +17,7 @@ export interface RestaurantInfo extends ReviewAndRating {
   category: string;
   thumbnails: {url: string; thumbnailId: number}[];
 }
+
+export type RestaurantMarkersAtom = {
+  restaurantsMarker: Map<number, KakaoMarker>;
+};
