@@ -1,10 +1,10 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {KakaoMap, KakaoNamespace, Position} from '../types/kakao';
-import {RestaurantInfo} from '../types/restaurant';
+import {RestaurantInfo, RestaurantMarkersAtom} from '../types/restaurant';
 import {useAtom} from 'jotai';
 import {restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
-import {addClusterer, centerChangedHandler, zoomChangedHandler} from '../services/kakaoMap';
+import {addMarkersAndClusterer, centerChangedHandler, zoomChangedHandler} from '../services/kakaoMap';
 import styled from '@emotion/styled';
 
 declare global {
@@ -45,16 +45,20 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
 
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
-  const [restaurantMarkersMap] = useAtom(restaurantMarkersAtom);
+  const [restaurantsMarkerAtom, setRestaurantsMarkerAtom] = useAtom<RestaurantMarkersAtom>(restaurantMarkersAtom);
 
-  const setMarkers = (map: KakaoMap, restaurants?: RestaurantInfo[]) => {
+  const setMarkersAndClusterer = (map: KakaoMap, restaurants?: RestaurantInfo[]) => {
     /**
      * TODO
      * 마커클러스터러 최초 1번만 생성되도록
      */
-    if (restaurants?.length) {
-      // 마커 클러스터러를 생성합니다
-      const clusterer = addClusterer(map, restaurants || [], userAccessPosition);
+    if (!restaurantsMarkerAtom.restaurantsMarker.size) {
+      // 마커 및 클러스터러를 생성합니다
+      const {markers, clusterer} = addMarkersAndClusterer(map, restaurants || [], userAccessPosition);
+
+      setRestaurantsMarkerAtom({
+        restaurantsMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
+      });
 
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
         // 현재 지도 레벨에서 1레벨 확대한 레벨
@@ -84,16 +88,9 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
           mapRef.current = new window.kakao.maps.Map(container, options);
         }
 
-        // 지도에 현 위치 마커 추가
-        const currentPosition = new window.kakao.maps.LatLng(latitude, longitude);
-        const currentPositionMarker = new window.kakao.maps.Marker({
-          position: currentPosition,
-        });
+        // 음식점 마커 및 클러스터러 마커 생성
+        setMarkersAndClusterer(mapRef.current);
 
-        // 음식점 마커 생성 및 표시
-        setMarkers(mapRef.current);
-
-        currentPositionMarker.setMap(mapRef.current!);
         setMapAtom(mapRef.current!);
 
         window.kakao.maps.event.addListener(mapRef.current, 'dragend', () =>
@@ -118,23 +115,21 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         const {data, statusText, message} = await fetch(
           `https://api.jobcatcher.shop/restaurants/search/v3?latitude=${latitude}&longitude=${longitude}`,
           // `https://api.jobcatcher.shop/restaurants/search/all`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              restaurantIds: restaurants.map(({restaurantId}) => restaurantId),
+            }),
+          },
         ).then(res => res.json());
 
         console.log(`latitude(${latitude}), longitude(${longitude})의 식당: `, data);
 
         if (statusText !== 'OK') {
           throw new Error(`${latitude}, ${longitude}에서 음식점 정보를 가져오는 중 에러가 발생했습니다 | ${message}`);
-        }
-
-        // return Data.meal;
-        // return [];
-        const {markers} = restaurantMarkersMap;
-        if (markers.size && !data.length) {
-          console.log('remove: ', markers.get(1));
-
-          for (const key of Object.keys(markers)) {
-            markers.get(parseInt(key))?.setMap(null);
-          }
         }
 
         return data;
@@ -190,11 +185,30 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
       if (!latitude && !longitude && zoomLevel === DEFAULT_ZOOM_LEVEL) return;
 
       await getRestaurants().then(res => {
-        setRestaurants(res);
-        setRestaurantsAtom({restaurants: res});
+        const {
+          restaurants: newRestaurants,
+          removeRestaurantIds,
+        }: {restaurants: RestaurantInfo[]; removeRestaurantIds: number[]} = res;
+
+        const _final = newRestaurants.length
+          ? newRestaurants.filter(({restaurantId}) => !removeRestaurantIds.includes(restaurantId))
+          : restaurants.filter(({restaurantId}) => !removeRestaurantIds.includes(restaurantId));
+
+        console.log('final: ', _final);
+
+        setRestaurants(_final);
+        setRestaurantsAtom({restaurants: _final});
         // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
 
-        if (mapRef.current) setMarkers(mapRef.current, res);
+        if (mapRef.current) setMarkersAndClusterer(mapRef.current, _final);
+
+        if (removeRestaurantIds.length) {
+          const {restaurantsMarker} = restaurantsMarkerAtom;
+          removeRestaurantIds.forEach(id => {
+            console.log('지워져야할 식당: ', id, restaurantsMarker.get(id));
+            restaurantsMarker.get(id)?.setMap(null);
+          });
+        }
       });
     })();
   }, [draggedPosition]);
