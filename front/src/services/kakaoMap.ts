@@ -81,7 +81,7 @@ export const markerClickCallback = (map: KakaoMap, customOverlay: KakaoCustomOve
   };
 };
 
-export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[], currentPosition: Position) => {
+export const addMarkersAndClusterer = (map: KakaoMap, restaurants: RestaurantInfo[], currentPosition: Position) => {
   const clusterer = new window.kakao.maps.MarkerClusterer({
     map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
     averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
@@ -90,7 +90,7 @@ export const addClusterer = (map: KakaoMap, restaurants: RestaurantInfo[], curre
   });
 
   const markers = initializeMarkersOnMap(map, restaurants, currentPosition);
-  clusterer.addMarkers(markers as KakaoMarker[]);
+  clusterer.addMarkers(markers.map(({marker}) => marker) as KakaoMarker[]);
 
-  return clusterer;
+  return {markers, clusterer};
 };
