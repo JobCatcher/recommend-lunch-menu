@@ -1,4 +1,4 @@
-import {KakaoMarker} from './kakao';
+import {KakaoMarker, KakaoMarkerClusterer} from './kakao';
 
 interface ReviewAndRating {
   별점?: string;
@@ -20,4 +20,8 @@ export interface RestaurantInfo extends ReviewAndRating {
 
 export type RestaurantMarkersAtom = {
   restaurantsMarker: Map<number, KakaoMarker>;
+};
+
+export type clustererAtom = {
+  clutererMarker: Map<string, KakaoMarkerClusterer>;
 };

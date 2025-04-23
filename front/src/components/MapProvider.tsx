@@ -1,8 +1,8 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {KakaoMap, KakaoNamespace, Position} from '../types/kakao';
-import {RestaurantInfo, RestaurantMarkersAtom} from '../types/restaurant';
+import {clustererAtom, RestaurantInfo, RestaurantMarkersAtom} from '../types/restaurant';
 import {useAtom} from 'jotai';
-import {restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
+import {clustererMarkerAtom, restaurantMarkersAtom, restaurantsAtom} from '../stores/restaurantAtom';
 import {mapAtom} from '../stores/mapAtom';
 import {addMarkersAndClusterer, centerChangedHandler, zoomChangedHandler} from '../services/kakaoMap';
 import styled from '@emotion/styled';
@@ -46,6 +46,7 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
   const [, setMapAtom] = useAtom(mapAtom);
   const [, setRestaurantsAtom] = useAtom(restaurantsAtom);
   const [restaurantsMarkerAtom, setRestaurantsMarkerAtom] = useAtom<RestaurantMarkersAtom>(restaurantMarkersAtom);
+  const [clusterersMarkerAtom, setClusterersMarkerAtom] = useAtom<clustererAtom>(clustererMarkerAtom);
 
   const setMarkersAndClusterer = (map: KakaoMap, restaurants?: RestaurantInfo[]) => {
     /**
@@ -53,12 +54,38 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
      * 마커클러스터러 최초 1번만 생성되도록
      */
     if (!restaurantsMarkerAtom.restaurantsMarker.size) {
-      // 마커 및 클러스터러를 생성합니다
-      const {markers, clusterer} = addMarkersAndClusterer(map, restaurants || [], userAccessPosition);
+      let clustererInstance;
+      if (!clusterersMarkerAtom.clutererMarker.size) {
+        clustererInstance = new window.kakao.maps.MarkerClusterer({
+          map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+          averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+          minLevel: 3, // 클러스터 할 최소 지도 레벨
+          disableClickZoom: true,
+        });
+
+        setClusterersMarkerAtom({
+          clutererMarker: new Map().set('clusterer', clustererInstance),
+        });
+      }
+      // 마커 생성 후 clusterer에 추가합니다
+      const {markers, clusterer} = addMarkersAndClusterer(
+        map,
+        clusterersMarkerAtom.clutererMarker.get('clusterer') || clustererInstance!,
+        restaurants || [],
+        userAccessPosition,
+      );
 
       setRestaurantsMarkerAtom({
         restaurantsMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
       });
+
+      // console.log('clusterer: ', clusterer);
+      // clusterer.clear();
+
+      // setClustererMarkerAtom({
+      //   // clutererMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
+      //   // clutererMarker: new Map(clusterer.map(({restaurantId, marker}) => [restaurantId, marker])),
+      // });
 
       window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
         // 현재 지도 레벨에서 1레벨 확대한 레벨
@@ -191,16 +218,19 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
         }: {restaurants: RestaurantInfo[]; removeRestaurantIds: number[]} = res;
 
         const _final = newRestaurants.length
-          ? newRestaurants.filter(({restaurantId}) => !removeRestaurantIds.includes(restaurantId))
+          ? restaurants.concat(newRestaurants).filter(({restaurantId}) => !removeRestaurantIds.includes(restaurantId))
           : restaurants.filter(({restaurantId}) => !removeRestaurantIds.includes(restaurantId));
 
         console.log('final: ', _final);
 
         setRestaurants(_final);
         setRestaurantsAtom({restaurants: _final});
-        // if (mapRef.current) addRestaurantMarkersOnMap(mapRef.current, res || []);
 
-        if (mapRef.current) setMarkersAndClusterer(mapRef.current, _final);
+        // 지도가 있고, 마커 데이터(새롭게 추가, 삭제)의 변화가 있는 경우
+        // marker와 clusterer를 새로 그린다.
+        if (mapRef.current && (newRestaurants.length || removeRestaurantIds.length)) {
+          setMarkersAndClusterer(mapRef.current, _final);
+        }
 
         if (removeRestaurantIds.length) {
           const {restaurantsMarker} = restaurantsMarkerAtom;
