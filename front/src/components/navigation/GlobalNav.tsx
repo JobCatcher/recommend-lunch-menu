@@ -20,6 +20,11 @@ const GlobalNav = ({setState}: Props) => {
   const handleClick = (e: React.MouseEvent) => {
     const value = e.currentTarget.getAttribute('value') as keyof Menu;
 
+    if (value === 'chatting') {
+      alert('메뉴 준비 중입니다.');
+      return;
+    }
+
     setState(prev => {
       if (prev?.[value] !== undefined) {
         return {...prev, [value]: !prev[value]};

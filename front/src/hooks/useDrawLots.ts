@@ -7,7 +7,13 @@ export default function useDrawLots() {
   const [makeLots, setMakeLots] = useState<() => void | null>(() => {});
 
   const restaurants = ['햄버거', '순대국', '정식당', '중국집', '구내식당'];
-  const colors: string[] = ['rgb(255,0,0)', 'rgb(0,0,0)', 'rgb(0,255,0)', 'rgb(0,0,255)', 'rgb(0,0,0)'];
+  const colors: string[] = [
+    'rgb(241, 169, 74)',
+    'rgb(249,158,151)',
+    'rgb(186, 156, 208)',
+    'rgb(158, 193, 230)',
+    'rgb(175, 212, 100)',
+  ];
 
   let c: HTMLCanvasElement | null;
   let _ctx: CanvasRenderingContext2D | null;
