@@ -51,7 +51,7 @@ jobs:
           docker push moonminhyuk1/restaurant:latest
 
       # 8. 서버1에 배포
-      - name: Deploy to Server1
+      - name: Deploy to Server1 (Rolling)
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER1_IP }}
@@ -62,9 +62,21 @@ jobs:
             docker stop restaurant || true
             docker rm restaurant || true
             docker run -d --name restaurant -p 8080:8080 moonminhyuk1/restaurant:latest
+            echo "Waiting for health check..."
+            for i in {1..10}; do
+              sleep 5
+              if curl -sf http://localhost:8080/health; then
+                echo "Server1 is healthy"
+                break
+              fi
+              if [ $i -eq 10 ]; then
+                echo "Server1 failed health check"
+                exit 1
+              fi
+            done
 
       # 9. 서버2에 배포
-      - name: Deploy to Server2
+      - name: Deploy to Server2 (Rolling)
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER2_IP }}
@@ -75,3 +87,15 @@ jobs:
             docker stop restaurant || true
             docker rm restaurant || true
             docker run -d --name restaurant -p 8080:8080 moonminhyuk1/restaurant:latest
+            echo "Waiting for health check..."
+            for i in {1..10}; do
+              sleep 5
+              if curl -sf http://localhost:8080/health; then
+                echo "Server2 is healthy"
+                break
+              fi
+              if [ $i -eq 10 ]; then
+                echo "Server2 failed health check"
+                exit 1
+              fi
+            done
