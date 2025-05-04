@@ -3,10 +3,6 @@
 
 name: CI/CD with GitHub Actions
 
-permissions:
-  contents: write
-  pull-requests: write
-
 on:
   push:
     branches: ["master", "dev"]
@@ -14,26 +10,22 @@ on:
       - "front/**"
 
 jobs:
-  setup_git:
-    runs-on: ubuntu-latest # Ubuntu 환경에서 실행
-    steps:
-      - name: Set up Git credential helper for Ubuntu
-        run: |
-          git config --global credential.helper store
-          git config --global credential.useHttpPath true
-
   build:
-    needs: setup_git
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Organization Repository  (only front/)
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Checkout Organization Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           repository: JobCatcher/recommend-lunch-menu # Organization의 원본 레포
-          sparse-checkout: |
-            front
 
       - name: Configure Git for Syncing Fork
         run: |
@@ -45,20 +37,17 @@ jobs:
           echo "Checking if PAT is available..."
           echo "Token length: ${{secrets.PERSONAL_ACCESS_TOKEN}}"
 
-      - name: Add Fork Repository as Remote
+      - name: Add Fork Repository as Remote (via SSH)
         run: |
           git remote rename origin upstream
-          git remote add origin https://github.com/lecto17/recommend-lunch-menu.git
+          git remote add origin git@github.com:lecto17/recommend-lunch-menu.git
           git fetch origin
-          git remote -v
 
-      - name: Sync Fork with Upstream (Organization Repository)
+      - name: Push to Fork
         run: |
-          git checkout dev
-          git pull upstream dev --rebase
+          git checkout -B dev upstream/dev
           git remote -v
-          git push https://lecto17:${{ secrets.LATEST_PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
-        #  git push https://x-access-token:${{ secrets.LATEST_PERSONAL_ACCESS_TOKEN }}@github.com/lecto17/recommend-lunch-menu.git dev
+          git push origin dev --force
 
       - name: Checkout Fork Repository
         uses: actions/checkout@v4
@@ -71,46 +60,4 @@ jobs:
         run: npm install -g vercel
 
       - name: Deploy to Vercel
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-  #     - name: Setup node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 18.x
-  #         cache: npm
-  #         cache-dependency-path: front/package-lock.json
-
-  #     - name: Install dependencies
-  #       run: npm ci
-  #       working-directory: front
-
-  #     - name: Build the project
-  #       run: npm run build
-  #       working-directory: front
-
-  # Deploy-Preview:
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout source code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         sparse-checkout: |
-  #           front
-  #         sparse-checkout-cone-mode: false
-
-  #     - name: Install Vercel CLI
-  #       run: npm install -g vercel@latest
-  #       working-directory: front
-
-  #     - name: Pull Vercel Environment Information
-  #       run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-  #       working-directory: front
-
-  #     - name: Build Project Artifacts
-  #       run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-  #       working-directory: front
-
-  #     - name: Deploy Project Artifacts to Vercel
-  #       run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-  #       working-directory: front
+        run: vercel --yes --prod --token=${{ secrets.VERCEL_TOKEN }}

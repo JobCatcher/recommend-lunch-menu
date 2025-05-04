@@ -98,6 +98,7 @@ export interface KakaoMarkerClusterer {
   minLevel: number; // 클러스터 할 최소 지도 레벨
   // addMarkers:;
   getCenter: () => KakaoLatLng;
+  clear: () => void;
 }
 
 interface KakaoSize {

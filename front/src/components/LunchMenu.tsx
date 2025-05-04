@@ -3,9 +3,11 @@ import styled from '@emotion/styled';
 import Restaurant from './Restaurant';
 import {useAtomValue} from 'jotai';
 import {restaurantsAtom} from '../stores/restaurantAtom';
+import {isMobile} from '../utils/utils';
 
 const LunchMenu = () => {
   const {restaurants} = useAtomValue(restaurantsAtom);
+  const mobile = isMobile();
 
   const getContents = () => {
     if (!restaurants.length) {
@@ -21,22 +23,27 @@ const LunchMenu = () => {
   };
 
   return (
-    <LunchMenuContainer>
+    <LunchMenuContainer mobile={mobile} className="lunch-container">
       <StyledText>추천 메뉴</StyledText>
-      <LunchMenuWrapper noContents={!restaurants.length}>{getContents()}</LunchMenuWrapper>
+      <ScrollWrapper>
+        <LunchMenuWrapper mobile={mobile} noContents={!restaurants.length}>
+          {getContents()}
+        </LunchMenuWrapper>
+      </ScrollWrapper>
     </LunchMenuContainer>
   );
 };
 
 export default LunchMenu;
 
-const LunchMenuContainer = styled.div`
+const LunchMenuContainer = styled.div<{mobile: boolean}>`
+  ${props => props.mobile && 'width: 100%;'}
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 800px;
-  overflow: scroll;
-  padding: 0 12px;
+  max-height: 800px;
+  overflow-x: hidden;
+  ${props => !props.mobile && 'padding: 0 12px;'}
 `;
 
 const StyledText = styled.h2`
@@ -45,14 +52,24 @@ const StyledText = styled.h2`
   margin: 16px 0;
 `;
 
-const LunchMenuWrapper = styled.ul<{noContents: boolean}>`
+const LunchMenuWrapper = styled.ul<{mobile: boolean; noContents: boolean}>`
   padding: 0 20px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: ${props => (props.mobile ? 'flex' : 'grid')};
+  ${props =>
+    props.mobile
+      ? 'overflow-x: scroll; white-space: nowrap; width: max-content;'
+      : 'grid-template-columns: repeat(2, 1fr);'}
   gap: 8px 16px;
   place-items: center;
   @media screen and (max-width: 1400px) {
     grid-template-columns: repeat(1, 1fr);
   }
   ${({noContents}) => noContents && `display: flex; min-width: 500px; justify-content: center;`}
+`;
+
+const ScrollWrapper = styled.div`
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
 `;
