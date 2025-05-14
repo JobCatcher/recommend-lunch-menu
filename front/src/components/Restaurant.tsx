@@ -1,10 +1,11 @@
 import styled from '@emotion/styled';
 import {RestaurantInfo} from '../types/restaurant';
-import {DISTANCE, getDistanceFromLatLonInKm, isMobile, makeCustomOverlay} from '../utils/utils';
+import {DISTANCE, getDistanceFromLatLonInKm, getTitle, isMobile, makeCustomOverlay} from '../utils/utils';
 import {useAtomValue} from 'jotai';
 import {mapAtom} from '../stores/mapAtom';
 import NoImage from '../../public/no-thumbnail.jpg';
 import {markerClickCallback} from '../services/kakaoMap';
+import {TITLE_LEN_LIMIT} from '../constants/constants';
 
 interface RestaurantProps {
   restaurant: RestaurantInfo;
@@ -34,7 +35,7 @@ const Restaurant = ({restaurant, currentPosition}: RestaurantProps) => {
         )}
       </ImageContainer>
       <InfoContainer mobile={mobile}>
-        <Title mobile={mobile}>{title} </Title>
+        <Title mobile={mobile}>{getTitle(title || '-', TITLE_LEN_LIMIT)} </Title>
         <Category>{category} </Category>
         {/* <Description>흑돼지요리사맛집</Description> */}
         <Review>
