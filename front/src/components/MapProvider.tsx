@@ -53,50 +53,50 @@ const MapProvider = ({children}: {children: React.ReactElement}) => {
      * TODO
      * 마커클러스터러 최초 1번만 생성되도록
      */
-    if (!restaurantsMarkerAtom.restaurantsMarker.size) {
-      let clustererInstance;
-      if (!clusterersMarkerAtom.clutererMarker.size) {
-        clustererInstance = new window.kakao.maps.MarkerClusterer({
-          map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
-          averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
-          minLevel: 3, // 클러스터 할 최소 지도 레벨
-          disableClickZoom: true,
-        });
-
-        setClusterersMarkerAtom({
-          clutererMarker: new Map().set('clusterer', clustererInstance),
-        });
-      }
-      // 마커 생성 후 clusterer에 추가합니다
-      const {markers, clusterer} = addMarkersAndClusterer(
-        map,
-        clusterersMarkerAtom.clutererMarker.get('clusterer') || clustererInstance!,
-        restaurants || [],
-        userAccessPosition,
-      );
-
-      setRestaurantsMarkerAtom({
-        restaurantsMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
+    let clustererInstance;
+    if (!clusterersMarkerAtom.clutererMarker.size) {
+      clustererInstance = new window.kakao.maps.MarkerClusterer({
+        map: map, // 마커들을 클러스터로 관리하고 표시할 지도 객체
+        averageCenter: true, // 클러스터에 포함된 마커들의 평균 위치를 클러스터 마커 위치로 설정
+        minLevel: 3, // 클러스터 할 최소 지도 레벨
+        disableClickZoom: true,
       });
 
-      // console.log('clusterer: ', clusterer);
-      // clusterer.clear();
-
-      // setClustererMarkerAtom({
-      //   // clutererMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
-      //   // clutererMarker: new Map(clusterer.map(({restaurantId, marker}) => [restaurantId, marker])),
-      // });
-
-      window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
-        // 현재 지도 레벨에서 1레벨 확대한 레벨
-        const level = map.getLevel() - 1;
-
-        // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
-        map.setLevel(level, {anchor: cluster.getCenter()});
+      setClusterersMarkerAtom({
+        clutererMarker: new Map().set('clusterer', clustererInstance),
       });
-
-      return;
     }
+
+    // 마커 생성 후 clusterer에 추가합니다
+    const {markers, clusterer} = addMarkersAndClusterer(
+      map,
+      clusterersMarkerAtom.clutererMarker.get('clusterer') || clustererInstance!,
+      restaurantsMarkerAtom,
+      restaurants || [],
+      userAccessPosition,
+    );
+
+    setRestaurantsMarkerAtom({
+      restaurantsMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
+    });
+
+    // console.log('clusterer: ', clusterer);
+    // clusterer.clear();
+
+    // setClustererMarkerAtom({
+    //   // clutererMarker: new Map(markers.map(({restaurantId, marker}) => [restaurantId, marker])),
+    //   // clutererMarker: new Map(clusterer.map(({restaurantId, marker}) => [restaurantId, marker])),
+    // });
+
+    window.kakao.maps.event.addListener(clusterer, 'clusterclick', function (cluster: any) {
+      // 현재 지도 레벨에서 1레벨 확대한 레벨
+      const level = map.getLevel() - 1;
+
+      // 지도를 클릭된 클러스터의 마커의 위치를 기준으로 확대합니다
+      map.setLevel(level, {anchor: cluster.getCenter()});
+    });
+
+    return;
   };
 
   const onLoadKakaoMap = useCallback(
