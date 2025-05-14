@@ -19,7 +19,7 @@ export default function useDrawLots() {
   let _ctx: CanvasRenderingContext2D | null;
 
   useEffect(() => {
-    c = document.querySelector('canvas');
+    c = canvasRef.current;
     if (!c) return;
     _ctx = c.getContext(`2d`);
     if (!_ctx) return;
@@ -71,7 +71,7 @@ export default function useDrawLots() {
         ctx.restore();
       }
     };
-    setMakeLots(() => _makeLots());
+    setMakeLots(() => _makeLots);
   }, []);
 
   const getCurrentRotation = () => {
