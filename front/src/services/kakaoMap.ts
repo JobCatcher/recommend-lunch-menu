@@ -1,6 +1,6 @@
 import {getDefaultStore} from 'jotai';
 import {KakaoCustomOverlay, KakaoMap, KakaoMarker, KakaoMarkerClusterer, Position} from '../types/kakao';
-import {RestaurantInfo} from '../types/restaurant';
+import {RestaurantInfo, RestaurantMarkersAtom} from '../types/restaurant';
 import {getDongName, initializeMarkersOnMap, navigateToRestaurant, setActiveMarker} from '../utils/utils';
 import {customOverayAtom, markerAtom} from '../stores/mapAtom';
 import {clickedRestaurantAtom} from '../stores/restaurantAtom';
@@ -84,10 +84,20 @@ export const markerClickCallback = (map: KakaoMap, customOverlay: KakaoCustomOve
 export const addMarkersAndClusterer = (
   map: KakaoMap,
   clusterer: KakaoMarkerClusterer,
+  restaurantsMarkerAtom: RestaurantMarkersAtom,
   restaurants: RestaurantInfo[],
   currentPosition: Position,
 ) => {
   const markers = initializeMarkersOnMap(map, restaurants, currentPosition);
+
+  const {restaurantsMarker} = restaurantsMarkerAtom;
+  // clusterer 초기화
+  for (const key of restaurantsMarker.keys()) {
+    clusterer.removeMarkers(restaurantsMarker.get(key)!);
+  }
+  clusterer.clear();
+
+  // clusterer marker 추가
   clusterer.addMarkers(markers.map(({marker}) => marker) as KakaoMarker[]);
 
   return {markers, clusterer};

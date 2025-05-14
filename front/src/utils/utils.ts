@@ -129,3 +129,7 @@ export const initializeMarkersOnMap = (map: KakaoMap, restaurants: RestaurantInf
     return {restaurantId: rest.restaurantId, marker};
   });
 };
+
+export const getTitle = (title: string, limitLength: number) => {
+  return title.length > limitLength ? title.substring(0, limitLength) + '...' : title;
+};
