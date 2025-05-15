@@ -29,7 +29,6 @@ const DrawLots = ({setState}: Props) => {
   };
 
   useEffect(() => {
-    console.log('effect: ', draw);
     draw?.makeLots && draw.makeLots();
   });
 
@@ -51,6 +50,7 @@ export default DrawLots;
 const Div = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   padding: 20px;
   width: 100%;
@@ -75,5 +75,5 @@ const DrawButton = styled.button`
   color: white;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 80px;
 `;
