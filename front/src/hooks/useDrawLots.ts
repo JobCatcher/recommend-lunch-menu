@@ -91,6 +91,7 @@ export default function useDrawLots() {
   };
 
   const rotate = () => {
+    c = canvasRef.current;
     if (!c) return;
     c.style.transform = `initial`;
     c.style.transition = `initial`;
