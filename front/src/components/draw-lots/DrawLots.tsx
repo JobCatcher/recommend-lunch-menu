@@ -25,9 +25,7 @@ const DrawLots = ({setState}: Props) => {
     if (buttonRef.current?.disabled) return;
 
     buttonRef.current!.disabled = true;
-    rotate && rotate();
-
-    buttonRef.current!.disabled = false;
+    rotate && rotate(buttonRef.current!);
   };
 
   useEffect(() => {

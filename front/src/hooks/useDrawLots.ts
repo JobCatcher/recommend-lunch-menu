@@ -90,7 +90,7 @@ export default function useDrawLots() {
     return angle < 0 ? angle + 360 : angle;
   };
 
-  const rotate = () => {
+  const rotate = (buttonRef: HTMLButtonElement) => {
     c = canvasRef.current;
     if (!c) return;
     c.style.transform = `initial`;
@@ -111,6 +111,7 @@ export default function useDrawLots() {
         const index = (Math.floor((360 - finalAngle) / arc) - 1 + restaurants.length) % restaurants.length;
 
         alert(`${restaurants[index]} 당첨!`);
+        buttonRef.disabled = false;
       }, 2000);
     }, 1);
   };
