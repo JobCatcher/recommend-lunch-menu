@@ -2,7 +2,7 @@ import {getDefaultStore} from 'jotai';
 import {KakaoMap, KakaoMarker, Position} from '../types/kakao';
 import {markerAtom} from '../stores/mapAtom';
 import RestaurantOverlay from '../components/RestaurantOverlay';
-import ReactDOMServer from 'react-dom/server';
+import {renderToString} from 'react-dom/server';
 import React from 'react';
 import {RestaurantInfo} from '../types/restaurant';
 import {markerClickCallback} from '../services/kakaoMap';
@@ -53,7 +53,7 @@ export const setActiveMarker = (map: KakaoMap, activeMarkerAtom: KakaoMarker, la
   const store = getDefaultStore();
 
   const imageSrc = '/active.png';
-  const imageSize = new window.kakao.maps.Size(28, 38);
+  const imageSize = new window.kakao.maps.Size(30, 44);
   const markerImage = new window.kakao.maps.MarkerImage(imageSrc, imageSize);
 
   const marker = new window.kakao.maps.Marker({
@@ -97,9 +97,11 @@ export const makeCustomOverlay = (
   currentPosition: Position,
   rest: Omit<RestaurantInfo, 'latitude' | 'longitude'>,
 ) => {
+  console.log('여기는 나오는 것인가');
   return new window.kakao.maps.CustomOverlay({
-    position: new window.kakao.maps.LatLng(latitude + 0.00045, longitude - 0.00045), // 마커를 표시할 위치
-    content: `${ReactDOMServer.renderToString(
+    position: new window.kakao.maps.LatLng(latitude + 0.00018, longitude - 0.00015), // 마커를 표시할 위치
+    // position: new window.kakao.maps.LatLng(latitude, longitude), // 마커를 표시할 위치
+    content: `${renderToString(
       React.createElement(RestaurantOverlay, {restaurant: {...rest, latitude, longitude}, currentPosition}),
     )}`,
     xAnchor: 0.3,
